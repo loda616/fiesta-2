@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1097774478630",
+    "project_id": "fiesta-9c7f4",
+    "storage_bucket": "fiesta-9c7f4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1097774478630:android:5f4df77b6d5ee9e953bde7",
+        "android_client_info": {
+          "package_name": "com.example.fiesta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDSUlU75846Eqf5NJ5LRWw2jhMS1TsaX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
