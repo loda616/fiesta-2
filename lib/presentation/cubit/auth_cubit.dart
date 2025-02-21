@@ -5,6 +5,7 @@ import '../../domain/usecases/get_current_user_usecase.dart' show GetCurrentUser
 import '../../domain/usecases/sign_in_usecase.dart' show SignInParams, SignInUseCase;
 import '../../domain/usecases/sign_out_usecase.dart' show SignOutUseCase;
 import '../../domain/usecases/sign_up_usecase.dart' show SignUpParams, SignUpUseCase;
+import 'auth_states.dart' show AuthError, AuthInitial, AuthLoading, AuthState, AuthSuccess;
 
 class AuthCubit extends Cubit<AuthState> {
   final SignInUseCase signInUseCase;
@@ -18,20 +19,6 @@ class AuthCubit extends Cubit<AuthState> {
     required this.signOutUseCase,
     required this.getCurrentUserUseCase,
   }) : super(AuthInitial());
-
-  Future<void> checkAuthState() async {
-    emit(AuthLoading());
-    try {
-      final user = await getCurrentUserUseCase(const NoParams());
-      if (user != null) {
-        emit(AuthSuccess(user));
-      } else {
-        emit(AuthInitial());
-      }
-    } catch (e) {
-      emit(AuthError(e.toString()));
-    }
-  }
 
   Future<void> signIn({
     required String email,
@@ -65,6 +52,9 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthSuccess(user));
     } catch (e) {
       emit(AuthError(e.toString()));
+      // Add a delay before resetting to initial state
+      await Future.delayed(const Duration(seconds: 2));
+      emit(AuthInitial());
     }
   }
 
@@ -75,23 +65,26 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthInitial());
     } catch (e) {
       emit(AuthError(e.toString()));
+      await Future.delayed(const Duration(seconds: 2));
+      emit(AuthInitial());
+    }
+  }
+
+  Future<void> checkAuthState() async {
+    emit(AuthLoading());
+    try {
+      final user = await getCurrentUserUseCase(const NoParams());
+      if (user != null) {
+        emit(AuthSuccess(user));
+      } else {
+        emit(AuthInitial());
+      }
+    } catch (e) {
+      emit(AuthError(e.toString()));
+      await Future.delayed(const Duration(seconds: 2));
+      emit(AuthInitial());
     }
   }
 }
 
-// Auth States
-abstract class AuthState {}
 
-class AuthInitial extends AuthState {}
-
-class AuthLoading extends AuthState {}
-
-class AuthSuccess extends AuthState {
-  final User user;
-  AuthSuccess(this.user);
-}
-
-class AuthError extends AuthState {
-  final String message;
-  AuthError(this.message);
-}

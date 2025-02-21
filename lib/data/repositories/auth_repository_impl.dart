@@ -27,9 +27,19 @@ class AuthRepositoryImpl implements AuthRepository {
           .doc(credential.user!.uid)
           .get();
 
+      if (!userDoc.exists) {
+        // Create user document if it doesn't exist
+        await _firestore.collection('users').doc(credential.user!.uid).set({
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
       return UserModel.fromFirestore(userDoc);
-    } catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthException(e);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: ${e.toString()}');
     }
   }
 
@@ -42,24 +52,22 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       // Create user document in Firestore
-      final userData = {
+      await _firestore.collection('users').doc(credential.user!.uid).set({
         'email': email,
         'username': username,
         'createdAt': FieldValue.serverTimestamp(),
-      };
+      });
 
-      await _firestore
+      final userDoc = await _firestore
           .collection('users')
           .doc(credential.user!.uid)
-          .set(userData);
+          .get();
 
-      return User(
-        id: credential.user!.uid,
-        email: email,
-        username: username,
-      );
-    } catch (e) {
+      return UserModel.fromFirestore(userDoc);
+    } on firebase_auth.FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthException(e);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: ${e.toString()}');
     }
   }
 
@@ -91,25 +99,27 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  String _handleFirebaseAuthException(dynamic e) {
-    if (e is firebase_auth.FirebaseAuthException) {
-      switch (e.code) {
-        case 'user-not-found':
-          return 'No user found with this email';
-        case 'wrong-password':
-          return 'Wrong password provided';
-        case 'email-already-in-use':
-          return 'The email address is already in use';
-        case 'invalid-email':
-          return 'The email address is invalid';
-        case 'operation-not-allowed':
-          return 'Email/password accounts are not enabled';
-        case 'weak-password':
-          return 'The password provided is too weak';
-        default:
-          return 'Authentication failed';
-      }
+  String _handleFirebaseAuthException(firebase_auth.FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'No user found with this email';
+      case 'wrong-password':
+        return 'Wrong password';
+      case 'invalid-email':
+        return 'Invalid email address';
+      case 'email-already-in-use':
+        return 'Email is already in use';
+      case 'weak-password':
+        return 'Password is too weak';
+      case 'operation-not-allowed':
+        return 'Operation not allowed';
+      case 'user-disabled':
+        return 'User account has been disabled';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later';
+      default:
+        return 'Authentication error: ${e.message}';
     }
-    return 'An unexpected error occurred';
   }
+
 }
