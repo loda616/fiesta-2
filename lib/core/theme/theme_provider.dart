@@ -2,32 +2,32 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import '../storage/local_storage.dart';
 
+
 enum AppThemeMode {
-  lightGrey,
-  lightPurple,
-  darkGrey,
+  light,
+  dark
 }
 
 class ThemeProvider extends ChangeNotifier {
   final LocalStorage localStorage;
   AppThemeMode _themeMode;
 
-  ThemeProvider(this.localStorage) : _themeMode = AppThemeMode.lightGrey {
+  ThemeProvider(this.localStorage) : _themeMode = AppThemeMode.dark {
     _loadTheme();
   }
 
   AppThemeMode get themeMode => _themeMode;
 
-  bool get isDarkMode => _themeMode == AppThemeMode.darkGrey;
+  bool get isDarkMode => _themeMode == AppThemeMode.dark;
+
+  String get themeName => isDarkMode ? "Deep Navy & Neon" : "Cream Paper & Burgundy";
 
   ThemeData getTheme(BuildContext context) {
     switch (_themeMode) {
-      case AppThemeMode.lightGrey:
-        return AppTheme.lightGreyTheme;
-      case AppThemeMode.lightPurple:
-        return AppTheme.lightPurpleTheme;
-      case AppThemeMode.darkGrey:
-        return AppTheme.darkGreyTheme;
+      case AppThemeMode.light:
+        return AppTheme.lightTheme;
+      case AppThemeMode.dark:
+        return AppTheme.darkTheme;
     }
   }
 
@@ -36,7 +36,7 @@ class ThemeProvider extends ChangeNotifier {
     if (savedTheme != null) {
       _themeMode = AppThemeMode.values.firstWhere(
             (e) => e.toString() == savedTheme,
-        orElse: () => AppThemeMode.lightGrey,
+        orElse: () => AppThemeMode.dark,
       );
       notifyListeners();
     }
@@ -49,26 +49,10 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   Future<void> toggleTheme() async {
-    if (_themeMode == AppThemeMode.lightGrey) {
-      await setTheme(AppThemeMode.darkGrey);
-    } else if (_themeMode == AppThemeMode.darkGrey) {
-      await setTheme(AppThemeMode.lightPurple);
+    if (_themeMode == AppThemeMode.dark) {
+      await setTheme(AppThemeMode.light);
     } else {
-      await setTheme(AppThemeMode.lightGrey);
-    }
-  }
-
-  Future<void> cycleTheme() async {
-    switch (_themeMode) {
-      case AppThemeMode.lightGrey:
-        await setTheme(AppThemeMode.darkGrey);
-        break;
-      case AppThemeMode.darkGrey:
-        await setTheme(AppThemeMode.lightPurple);
-        break;
-      case AppThemeMode.lightPurple:
-        await setTheme(AppThemeMode.lightGrey);
-        break;
+      await setTheme(AppThemeMode.dark);
     }
   }
 }

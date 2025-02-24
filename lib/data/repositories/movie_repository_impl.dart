@@ -4,6 +4,8 @@ import '../../domain/entities/movie.dart';
 import '../../domain/repositories/movie_repository.dart';
 import '../datasources/movie_api_source.dart';
 
+
+
 class MovieRepositoryImpl implements MovieRepository {
   final MovieApiSource movieApiSource;
 
@@ -16,6 +18,16 @@ class MovieRepositoryImpl implements MovieRepository {
       return Right(movies);
     } catch (e) {
       return Left(ServerFailure('Failed to search movies'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Movie>>> getMovieRecommendations(String movieId) async {
+    try {
+      final movies = await movieApiSource.getMovieRecommendations(movieId);
+      return Right(movies);
+    } catch (e) {
+      return Left(ServerFailure('Failed to get movie recommendations: ${e.toString()}'));
     }
   }
 

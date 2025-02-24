@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Core imports
+import 'core/theme/app_theme.dart' show AppTheme;
 import 'core/theme/theme_provider.dart';
 import 'core/routes/app_router.dart';
 import 'core/storage/local_storage.dart';
@@ -123,6 +124,8 @@ class MyApp extends StatelessWidget {
                 title: 'WatchList',
                 debugShowCheckedModeBanner: false,
                 theme: themeProvider.getTheme(context),
+                darkTheme: AppTheme.darkTheme,
+                themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
                 initialRoute: AppRouter.splash,
                 onGenerateRoute: AppRouter.onGenerateRoute,
                 builder: (context, widget) {

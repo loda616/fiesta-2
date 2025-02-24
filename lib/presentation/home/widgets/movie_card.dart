@@ -1,52 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../domain/entities/movie.dart';
 
 class MovieCard extends StatelessWidget {
-  final String title;
-  final String poster;
-  final String rating;
+  final Movie movie;
+  final VoidCallback? onTap;
 
   const MovieCard({
-    super.key,
-    required this.title,
-    required this.poster,
-    required this.rating,
-  });
+    Key? key,
+    required this.movie,
+    this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: AspectRatio(
-              aspectRatio: 2 / 3,
-              child: poster.isNotEmpty
-                  ? Image.network(poster, fit: BoxFit.cover)
-                  : Container(
-                color: Colors.grey[300],
-                child: const Icon(Icons.movie),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 140.w,
+        height: 200.h,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.r),
+          color: Theme.of(context).cardColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.r),
+                  topRight: Radius.circular(8.r),
+                ),
+                child: movie.poster.isNotEmpty
+                    ? Image.network(
+                  movie.poster,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[300],
+                    child: Icon(Icons.movie, size: 40.sp),
+                  ),
+                )
+                    : Container(
+                  color: Colors.grey[300],
+                  child: Icon(Icons.movie, size: 40.sp),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          Row(
-            children: [
-              const Icon(Icons.star, size: 16, color: Colors.amber),
-              const SizedBox(width: 4),
-              Text(rating),
-            ],
-          ),
-        ],
+            Padding(
+              padding: EdgeInsets.all(8.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    movie.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    children: [
+                      if (movie.imdbRating != null) ...[
+                        Icon(Icons.star, size: 14.sp, color: Colors.amber),
+                        SizedBox(width: 4.w),
+                        Text(
+                          movie.imdbRating!,
+                          style: TextStyle(fontSize: 10.sp),
+                        ),
+                        SizedBox(width: 8.w),
+                      ],
+                      Text(
+                        movie.year,
+                        style: TextStyle(fontSize: 10.sp),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

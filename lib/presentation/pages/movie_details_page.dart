@@ -1,144 +1,172 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/get_movie_details_usecase.dart';
-import '../../domain/usecases/get_movies_usecase.dart';
-import '../bloc/movie/movie_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../cubit/movie_details_cubit.dart';
+import '../widgets/movie_recommendations.dart';
 
-class MovieDetailsPage extends StatelessWidget {
+class MovieDetailsPage extends StatefulWidget {
   final String movieId;
 
   const MovieDetailsPage({
-    super.key,
+    Key? key,
     required this.movieId,
-  });
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MovieBloc(
-        getMovies: context.read<GetMoviesUseCase>(),
-        getMovieDetails: context.read<GetMovieDetailsUseCase>(),
-      )..add(GetMovieDetails(movieId)),
-      child: const MovieDetailsView(),
-    );
-  }
+  State<MovieDetailsPage> createState() => _MovieDetailsPageState();
 }
 
-class MovieDetailsView extends StatelessWidget {
-  const MovieDetailsView({super.key});
+class _MovieDetailsPageState extends State<MovieDetailsPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<MovieDetailsCubit>().loadMovieDetails(widget.movieId);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      body: BlocBuilder<MovieBloc, MovieState>(
+      body: BlocBuilder<MovieDetailsCubit, MovieDetailsState>(
         builder: (context, state) {
-          if (state is MovieLoading) {
+          if (state is MovieDetailsLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (state is MovieError) {
-            return Center(child: Text(state.message));
+
+          if (state is MovieDetailsError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48.sp,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    state.message,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      context.read<MovieDetailsCubit>()
+                          .loadMovieDetails(widget.movieId);
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
           }
+
           if (state is MovieDetailsLoaded) {
-            final movie = state.movie;
             return CustomScrollView(
               slivers: [
                 SliverAppBar(
-                  expandedHeight: 300,
+                  expandedHeight: 300.h,
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
-                    background: movie.poster.isNotEmpty
+                    background: state.movie.poster.isNotEmpty
                         ? Image.network(
-                      movie.poster,
+                      state.movie.poster,
                       fit: BoxFit.cover,
                     )
                         : Container(
                       color: Colors.grey[300],
-                      child: const Icon(Icons.movie, size: 100),
+                      child: Icon(
+                        Icons.movie,
+                        size: 100.sp,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(16.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               child: Text(
-                                movie.title,
-                                style: theme.textTheme.headlineSmall,
+                                state.movie.title,
+                                style: TextStyle(
+                                  fontSize: 24.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             IconButton(
                               icon: Icon(
-                                movie.isInWatchlist
+                                state.isInWatchlist
                                     ? Icons.bookmark
-                                    : Icons.bookmark_outline,
+                                    : Icons.bookmark_border,
                               ),
                               onPressed: () {
-                                // Handle watchlist toggle
+                                // Toggle watchlist
                               },
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         Row(
                           children: [
-                            if (movie.imdbRating != null) ...[
-                              const Icon(Icons.star, color: Colors.amber),
-                              const SizedBox(width: 4),
-                              Text(movie.imdbRating!),
-                              const SizedBox(width: 16),
+                            if (state.movie.imdbRating != null) ...[
+                              Icon(Icons.star, color: Colors.amber, size: 20.sp),
+                              SizedBox(width: 4.w),
+                              Text(
+                                state.movie.imdbRating!,
+                                style: TextStyle(fontSize: 16.sp),
+                              ),
+                              SizedBox(width: 16.w),
                             ],
-                            Text(movie.year),
-                            if (movie.runtime != null) ...[
-                              const SizedBox(width: 16),
-                              Text(movie.runtime!),
+                            Text(
+                              state.movie.year,
+                              style: TextStyle(fontSize: 16.sp),
+                            ),
+                            if (state.movie.runtime != null) ...[
+                              SizedBox(width: 16.w),
+                              Text(
+                                state.movie.runtime!,
+                                style: TextStyle(fontSize: 16.sp),
+                              ),
                             ],
                           ],
                         ),
-                        if (movie.genre != null) ...[
-                          const SizedBox(height: 16),
+                        if (state.movie.genre != null) ...[
+                          SizedBox(height: 16.h),
                           Wrap(
-                            spacing: 8,
-                            children: movie.genre!
+                            spacing: 8.w,
+                            runSpacing: 8.h,
+                            children: state.movie.genre!
                                 .split(',')
-                                .map((genre) => Chip(label: Text(genre.trim())))
+                                .map((genre) => Chip(
+                              label: Text(genre.trim()),
+                            ))
                                 .toList(),
                           ),
                         ],
-                        if (movie.plot != null) ...[
-                          const SizedBox(height: 16),
+                        if (state.movie.plot != null) ...[
+                          SizedBox(height: 16.h),
                           Text(
                             'Plot',
-                            style: theme.textTheme.titleMedium,
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(movie.plot!),
-                        ],
-                        if (movie.director != null) ...[
-                          const SizedBox(height: 16),
+                          SizedBox(height: 8.h),
                           Text(
-                            'Director',
-                            style: theme.textTheme.titleMedium,
+                            state.movie.plot!,
+                            style: TextStyle(fontSize: 16.sp),
                           ),
-                          const SizedBox(height: 8),
-                          Text(movie.director!),
                         ],
-                        if (movie.actors != null) ...[
-                          const SizedBox(height: 16),
-                          Text(
-                            'Cast',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(movie.actors!),
-                        ],
+                        SizedBox(height: 24.h),
+                        MovieRecommendations(
+                          recommendations: state.recommendations,
+                        ),
                       ],
                     ),
                   ),
@@ -146,7 +174,8 @@ class MovieDetailsView extends StatelessWidget {
               ],
             );
           }
-          return const SizedBox();
+
+          return const SizedBox.shrink();
         },
       ),
     );

@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import '../../../cubit/movie_cubit.dart' show MovieCubit, MovieError, MovieLoading, MovieSearchLoaded, MovieState;
+import '../../widgets/movie_card.dart' show MovieCard;
 
-import '../../../bloc/movie/movie_bloc.dart';
-import '../../widgets/movie_card.dart';
 
-class PopularMoviesSection extends StatelessWidget {
-  const PopularMoviesSection({super.key});
+class PopularMoviesSection extends StatefulWidget {
+  const PopularMoviesSection({Key? key}) : super(key: key);
+
+  @override
+  State<PopularMoviesSection> createState() => _PopularMoviesSectionState();
+}
+
+class _PopularMoviesSectionState extends State<PopularMoviesSection> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<MovieCubit>().loadPopularMovies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,48 +26,97 @@ class PopularMoviesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Popular Movies',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.sp,
+                ),
               ),
               TextButton(
-                onPressed: () {},
-                child: const Text('See All'),
+                onPressed: () {
+                  // Navigate to full list
+                },
+                child: Text(
+                  'See All',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 14.sp,
+                  ),
+                ),
               ),
             ],
           ),
         ),
-        BlocBuilder<MovieBloc, MovieState>(
+        BlocBuilder<MovieCubit, MovieState>(
           builder: (context, state) {
             if (state is MovieLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              );
             }
+
             if (state is MovieError) {
-              return Center(child: Text(state.message));
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48.sp,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Failed to load popular movies',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.read<MovieCubit>().loadPopularMovies();
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: 6, // Show first 6 movies
-              itemBuilder: (context, index) {
-                return MovieCard(
-                  title: 'Movie Title',
-                  poster: '',
-                  rating: '8.5',
-                );
-              },
-            );
+
+            if (state is MovieSearchLoaded) {
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.7,
+                  crossAxisSpacing: 16.w,
+                  mainAxisSpacing: 16.h,
+                ),
+                itemCount: state.movies.length,
+                itemBuilder: (context, index) {
+                  final movie = state.movies[index];
+                  return MovieCard(
+                    movie: movie,
+                    onTap: (){},
+                  );
+                },
+              );
+            }
+
+            return const SizedBox.shrink();
           },
         ),
       ],
