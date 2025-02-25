@@ -8,6 +8,17 @@ import '../../widgets/error_view.dart' show ErrorView;
 import '../../widgets/filter_dialogs.dart' show FilterDialogs;
 import '../../widgets/movie_grid.dart' show MovieGrid;
 
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../data/datasources/search_local_source.dart';
+import '../../cubit/movie_cubit.dart';
+import '../../widgets/empty_state.dart' show EmptyState;
+import '../../widgets/error_view.dart' show ErrorView;
+import '../../widgets/filter_dialogs.dart' show FilterDialogs;
+import '../../widgets/movie_grid.dart' show MovieGrid;
+
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
 
@@ -86,10 +97,21 @@ class _SearchTabState extends State<SearchTab> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Add extra space at the top
+        SizedBox(height: 16.h),
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Add title above search bar
+              Text(
+                'Find Movies & Shows',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16.h),
               SearchBar(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
@@ -106,7 +128,7 @@ class _SearchTabState extends State<SearchTab> {
                     ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 20.h), // Increase space before filters
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -115,18 +137,21 @@ class _SearchTabState extends State<SearchTab> {
                       label: Text('Genre: $_selectedGenre'),
                       onSelected: (_) => _showGenreFilter(),
                       selected: _selectedGenre != 'All',
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 12.w), // Increase spacing between filters
                     FilterChip(
                       label: Text('Year: $_selectedYear'),
                       onSelected: (_) => _showYearFilter(),
                       selected: _selectedYear != 'All',
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 12.w), // Increase spacing between filters
                     FilterChip(
                       label: Text('Sort: $_sortBy'),
                       onSelected: (_) => _showSortOptions(),
                       selected: true,
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                     ),
                   ],
                 ),

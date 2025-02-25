@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../domain/entities/movie.dart';
 
 class MovieGrid extends StatelessWidget {
@@ -14,12 +15,12 @@ class MovieGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.all(16.w),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        childAspectRatio: 0.65, // Make cards slightly taller for better text display
+        crossAxisSpacing: 16.w,
+        mainAxisSpacing: 16.h,
       ),
       itemCount: movies.length,
       itemBuilder: (context, index) {

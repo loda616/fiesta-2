@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/movie.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../domain/entities/movie.dart';
+
 class AnimatedMovieCard extends StatefulWidget {
   final Movie movie;
   final VoidCallback onTap;
@@ -56,7 +60,7 @@ class _AnimatedMovieCardState extends State<AnimatedMovieCard>
             scale: _scaleAnimation.value,
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -66,7 +70,7 @@ class _AnimatedMovieCardState extends State<AnimatedMovieCard>
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -79,17 +83,17 @@ class _AnimatedMovieCardState extends State<AnimatedMovieCard>
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: Colors.grey[300],
-                            child: const Icon(Icons.movie, size: 50),
+                            child: Icon(Icons.movie, size: 40.sp),
                           );
                         },
                       )
                           : Container(
                         color: Colors.grey[300],
-                        child: const Icon(Icons.movie, size: 50),
+                        child: Icon(Icons.movie, size: 40.sp),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(8.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -99,24 +103,30 @@ class _AnimatedMovieCardState extends State<AnimatedMovieCard>
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleSmall,
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4.h),
                           Row(
                             children: [
                               if (widget.movie.imdbRating != null) ...[
-                                const Icon(Icons.star,
+                                Icon(Icons.star,
                                     color: Colors.amber,
-                                    size: 16
+                                    size: 14.sp
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  widget.movie.imdbRating!,
-                                  style: theme.textTheme.bodySmall,
+                                SizedBox(width: 4.w),
+                                Flexible(
+                                  child: Text(
+                                    widget.movie.imdbRating!,
+                                    style: theme.textTheme.bodySmall,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8.w),
                               ],
-                              Text(
-                                widget.movie.year,
-                                style: theme.textTheme.bodySmall,
+                              Flexible(
+                                child: Text(
+                                  widget.movie.year,
+                                  style: theme.textTheme.bodySmall,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                           ),

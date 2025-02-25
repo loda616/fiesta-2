@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../domain/entities/movie.dart';
 
+
+
 class MovieCard extends StatelessWidget {
   final Movie movie;
   final VoidCallback? onTap;
@@ -17,8 +19,8 @@ class MovieCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 140.w,
-        height: 200.h,
+        // Remove fixed width/height to prevent overflow
+        // Let the grid control the sizing
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.r),
           color: Theme.of(context).cardColor,
@@ -76,15 +78,21 @@ class MovieCard extends StatelessWidget {
                       if (movie.imdbRating != null) ...[
                         Icon(Icons.star, size: 14.sp, color: Colors.amber),
                         SizedBox(width: 4.w),
-                        Text(
-                          movie.imdbRating!,
-                          style: TextStyle(fontSize: 10.sp),
+                        Flexible(
+                          child: Text(
+                            movie.imdbRating!,
+                            style: TextStyle(fontSize: 10.sp),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         SizedBox(width: 8.w),
                       ],
-                      Text(
-                        movie.year,
-                        style: TextStyle(fontSize: 10.sp),
+                      Flexible(
+                        child: Text(
+                          movie.year,
+                          style: TextStyle(fontSize: 10.sp),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),

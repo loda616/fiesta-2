@@ -6,6 +6,9 @@ import '../../domain/usecases/sign_in_usecase.dart' show SignInParams, SignInUse
 import '../../domain/usecases/sign_out_usecase.dart' show SignOutUseCase;
 import '../../domain/usecases/sign_up_usecase.dart' show SignUpParams, SignUpUseCase;
 import 'auth_states.dart' show AuthError, AuthInitial, AuthLoading, AuthState, AuthSuccess;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class AuthCubit extends Cubit<AuthState> {
   final SignInUseCase signInUseCase;
@@ -104,8 +107,13 @@ class AuthCubit extends Cubit<AuthState> {
 
     emit(AuthLoading());
     try {
-      // TODO: Implement this in the repository
-      // Temporarily just updating local state
+      // Update username in Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_currentUser!.id)
+          .update({'username': newUsername});
+
+      // Update local user object
       _currentUser = User(
         id: _currentUser!.id,
         email: _currentUser!.email,
@@ -115,18 +123,24 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthSuccess(_currentUser!));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('Failed to update username: ${e.toString()}'));
     }
   }
 
   Future<void> resetPassword(String email) async {
     emit(AuthLoading());
     try {
-      // TODO: Implement this in the repository
-      // await _authRepository.sendPasswordResetEmail(email);
-      emit(AuthSuccess(_currentUser!));
+      // Send password reset email using Firebase Auth
+      await firebase_auth.FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      // If current user exists, emit success, otherwise emit initial state
+      if (_currentUser != null) {
+        emit(AuthSuccess(_currentUser!));
+      } else {
+        emit(AuthInitial());
+      }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('Failed to send password reset email: ${e.toString()}'));
     }
   }
 }
