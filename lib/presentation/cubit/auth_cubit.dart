@@ -20,6 +20,9 @@ class AuthCubit extends Cubit<AuthState> {
     required this.getCurrentUserUseCase,
   }) : super(AuthInitial());
 
+  // Track current user for easier access
+  User? _currentUser;
+
   Future<void> signIn({
     required String email,
     required String password,
@@ -29,6 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
       final user = await signInUseCase(
         SignInParams(email: email, password: password),
       );
+      _currentUser = user;
       emit(AuthSuccess(user));
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -49,6 +53,7 @@ class AuthCubit extends Cubit<AuthState> {
           username: username,
         ),
       );
+      _currentUser = user;
       emit(AuthSuccess(user));
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -61,8 +66,11 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signOut() async {
     emit(AuthLoading());
     try {
-      await signOutUseCase(const NoParams());
-      emit(AuthInitial());
+      final result = await signOutUseCase(const NoParams());
+      result.fold(
+              (failure) => emit(AuthError(failure.message)),
+              (_) => emit(AuthInitial())
+      );
     } catch (e) {
       emit(AuthError(e.toString()));
       await Future.delayed(const Duration(seconds: 2));
@@ -75,8 +83,10 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final user = await getCurrentUserUseCase(const NoParams());
       if (user != null) {
-        emit(AuthSuccess(user as User));
+        _currentUser = user as User;
+        emit(AuthSuccess(_currentUser!));
       } else {
+        _currentUser = null;
         emit(AuthInitial());
       }
     } catch (e) {
@@ -85,6 +95,38 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthInitial());
     }
   }
+
+  Future<void> updateUsername(String newUsername) async {
+    if (_currentUser == null) {
+      emit(AuthError('No user is logged in'));
+      return;
+    }
+
+    emit(AuthLoading());
+    try {
+      // TODO: Implement this in the repository
+      // Temporarily just updating local state
+      _currentUser = User(
+        id: _currentUser!.id,
+        email: _currentUser!.email,
+        username: newUsername,
+        createdAt: _currentUser!.createdAt,
+      );
+
+      emit(AuthSuccess(_currentUser!));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    emit(AuthLoading());
+    try {
+      // TODO: Implement this in the repository
+      // await _authRepository.sendPasswordResetEmail(email);
+      emit(AuthSuccess(_currentUser!));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
 }
-
-
