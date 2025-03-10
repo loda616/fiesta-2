@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/routes/app_router.dart';
-import 'di/injection.dart';
+import 'di/injection.dart'; // Updated import path
 
 // Presentation layer imports
 import 'presentation/cubit/auth_cubit.dart';

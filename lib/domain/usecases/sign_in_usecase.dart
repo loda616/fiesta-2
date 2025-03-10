@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+import '../../core/errors/failures.dart';
+import '../../core/usecases/usecase.dart';
 import '../entities/user.dart';
 import '../repositories/auth_repository.dart';
 
@@ -8,13 +11,18 @@ class SignInParams {
   SignInParams({required this.email, required this.password});
 }
 
-class SignInUseCase {
+class SignInUseCase implements UseCase<User, SignInParams> {
   final AuthRepository repository;
 
   SignInUseCase(this.repository);
 
-  Future<User> call(SignInParams params) {
-    return repository.signIn(params.email, params.password);
+  @override
+  Future<Either<Failure, User>> call(SignInParams params) async {
+    try {
+      final user = await repository.signIn(params.email, params.password);
+      return Right(user);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 }
-

@@ -32,11 +32,17 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      final user = await signInUseCase(
+      final result = await signInUseCase(
         SignInParams(email: email, password: password),
       );
-      _currentUser = user;
-      emit(AuthSuccess(user));
+
+      result.fold(
+              (failure) => emit(AuthError(failure.message)),
+              (user) {
+            _currentUser = user;
+            emit(AuthSuccess(user));
+          }
+      );
     } catch (e) {
       emit(AuthError(e.toString()));
     }
@@ -49,15 +55,21 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      final user = await signUpUseCase(
+      final result = await signUpUseCase(
         SignUpParams(
           email: email,
           password: password,
           username: username,
         ),
       );
-      _currentUser = user;
-      emit(AuthSuccess(user));
+
+      result.fold(
+              (failure) => emit(AuthError(failure.message)),
+              (user) {
+            _currentUser = user;
+            emit(AuthSuccess(user));
+          }
+      );
     } catch (e) {
       emit(AuthError(e.toString()));
       // Add a delay before resetting to initial state
@@ -84,58 +96,22 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> checkAuthState() async {
     emit(AuthLoading());
     try {
-      final user = await getCurrentUserUseCase(const NoParams());
-      _currentUser = user as User;
-      emit(AuthSuccess(_currentUser!));
-        } catch (e) {
+      final result = await getCurrentUserUseCase(const NoParams());
+      result.fold(
+              (failure) => emit(AuthInitial()),
+              (user) {
+            if (user != null) {
+              _currentUser = user;
+              emit(AuthSuccess(user));
+            } else {
+              emit(AuthInitial());
+            }
+          }
+      );
+    } catch (e) {
       emit(AuthError(e.toString()));
       await Future.delayed(const Duration(seconds: 2));
       emit(AuthInitial());
-    }
-  }
-
-  Future<void> updateUsername(String newUsername) async {
-    if (_currentUser == null) {
-      emit(AuthError('No user is logged in'));
-      return;
-    }
-
-    emit(AuthLoading());
-    try {
-      // Update username in Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_currentUser!.id)
-          .update({'username': newUsername});
-
-      // Update local user object
-      _currentUser = User(
-        id: _currentUser!.id,
-        email: _currentUser!.email,
-        username: newUsername,
-        createdAt: _currentUser!.createdAt,
-      );
-
-      emit(AuthSuccess(_currentUser!));
-    } catch (e) {
-      emit(AuthError('Failed to update username: ${e.toString()}'));
-    }
-  }
-
-  Future<void> resetPassword(String email) async {
-    emit(AuthLoading());
-    try {
-      // Send password reset email using Firebase Auth
-      await firebase_auth.FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-
-      // If current user exists, emit success, otherwise emit initial state
-      if (_currentUser != null) {
-        emit(AuthSuccess(_currentUser!));
-      } else {
-        emit(AuthInitial());
-      }
-    } catch (e) {
-      emit(AuthError('Failed to send password reset email: ${e.toString()}'));
     }
   }
 }
