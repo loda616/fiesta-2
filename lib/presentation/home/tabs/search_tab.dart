@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../data/datasources/search_local_source.dart';
-import '../../cubit/movie_cubit.dart';
-import '../../widgets/empty_state.dart' show EmptyState;
-import '../../widgets/error_view.dart' show ErrorView;
-import '../../widgets/filter_dialogs.dart' show FilterDialogs;
-import '../../../domain/entities/movie.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../domain/entities/movie.dart' show Movie;
+import '../../cubit/Search/search_cubit.dart';
+import '../../widgets/empty_state.dart' show EmptyState;
+import '../../widgets/error_view.dart';
+import '../../widgets/filter_dialogs.dart' show FilterDialogs;
+
 
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
@@ -22,6 +23,7 @@ class _SearchTabState extends State<SearchTab> {
   String _selectedGenre = 'All';
   String _selectedYear = 'All';
   String _sortBy = 'Rating';
+  String? _contentType;
 
   @override
   void dispose() {
@@ -34,14 +36,71 @@ class _SearchTabState extends State<SearchTab> {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (query.isNotEmpty) {
-        context.read<MovieCubit>().searchMovies(
+        context.read<SearchCubit>().searchContent(
           query,
+          contentType: _contentType,
           genre: _selectedGenre == 'All' ? null : _selectedGenre,
           year: _selectedYear == 'All' ? null : _selectedYear,
           sortBy: _sortBy,
         );
       }
     });
+  }
+
+  void _showContentTypeFilter() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Content Type'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String?>(
+              title: const Text('All'),
+              value: null,
+              groupValue: _contentType,
+              onChanged: (value) {
+                setState(() {
+                  _contentType = value;
+                });
+                Navigator.pop(context);
+                if (_searchController.text.isNotEmpty) {
+                  _onSearchChanged(_searchController.text);
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: const Text('Movies'),
+              value: 'movie',
+              groupValue: _contentType,
+              onChanged: (value) {
+                setState(() {
+                  _contentType = value;
+                });
+                Navigator.pop(context);
+                if (_searchController.text.isNotEmpty) {
+                  _onSearchChanged(_searchController.text);
+                }
+              },
+            ),
+            RadioListTile<String?>(
+              title: const Text('TV Shows'),
+              value: 'tv',
+              groupValue: _contentType,
+              onChanged: (value) {
+                setState(() {
+                  _contentType = value;
+                });
+                Navigator.pop(context);
+                if (_searchController.text.isNotEmpty) {
+                  _onSearchChanged(_searchController.text);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showGenreFilter() {
@@ -118,7 +177,7 @@ class _SearchTabState extends State<SearchTab> {
                       icon: const Icon(Icons.clear),
                       onPressed: () {
                         _searchController.clear();
-                        context.read<MovieCubit>().resetState();
+                        context.read<SearchCubit>().resetState();
                         setState(() {});
                       },
                     ),
@@ -136,6 +195,12 @@ class _SearchTabState extends State<SearchTab> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
+                      FilterChip(
+                        label: Text('Type: ${_contentTypeLabel()}'),
+                        onSelected: (_) => _showContentTypeFilter(),
+                        selected: _contentType != null,
+                      ),
+                      SizedBox(width: 12.w), // Increase spacing between filters
                       FilterChip(
                         label: Text('Genre: $_selectedGenre'),
                         onSelected: (_) => _showGenreFilter(),
@@ -163,18 +228,18 @@ class _SearchTabState extends State<SearchTab> {
           ),
         ),
         Expanded(
-          child: BlocBuilder<MovieCubit, MovieState>(
+          child: BlocBuilder<SearchCubit, SearchState>(
             builder: (context, state) {
-              if (state is MovieLoading) {
+              if (state is SearchLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (state is MovieError) {
+              if (state is SearchError) {
                 return ErrorView(
                   message: state.message,
                   onRetry: () => _onSearchChanged(_searchController.text),
                 );
               }
-              if (state is MovieSearchLoaded) {
+              if (state is SearchLoaded) {
                 if (state.movies.isEmpty) {
                   return const EmptyState(
                     message: 'No movies found',
@@ -219,7 +284,7 @@ class _SearchTabState extends State<SearchTab> {
   }
 
   Widget _buildSearchHistory() {
-    final searchHistory = context.read<SearchLocalSource>().getSearchHistory();
+    final searchHistory = context.read<SearchCubit>().getSearchHistory();
     if (searchHistory.isEmpty) {
       return const EmptyState(
         message: 'Search for movies',
@@ -231,37 +296,71 @@ class _SearchTabState extends State<SearchTab> {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = screenWidth > 600 ? 16.0 : 8.0;
 
-    return ListView.builder(
-      padding: EdgeInsets.all(padding),
-      itemCount: searchHistory.length,
-      itemBuilder: (context, index) {
-        final query = searchHistory[index];
-        return ListTile(
-          dense: screenWidth < 360, // More compact on very small screens
-          leading: const Icon(Icons.history),
-          title: Text(
-            query,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.all(padding),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recent Searches',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<SearchCubit>().clearSearchHistory();
+                },
+                child: const Text('Clear'),
+              ),
+            ],
           ),
-          onTap: () {
-            _searchController.text = query;
-            _onSearchChanged(query);
-          },
-          trailing: IconButton(
-            icon: const Icon(Icons.north_west),
-            onPressed: () {
-              _searchController.text = query;
-              _onSearchChanged(query);
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.all(padding),
+            itemCount: searchHistory.length,
+            itemBuilder: (context, index) {
+              final query = searchHistory[index];
+              return ListTile(
+                dense: screenWidth < 360, // More compact on very small screens
+                leading: const Icon(Icons.history),
+                title: Text(
+                  query,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () {
+                  _searchController.text = query;
+                  _onSearchChanged(query);
+                },
+                trailing: IconButton(
+                  icon: const Icon(Icons.north_west),
+                  onPressed: () {
+                    _searchController.text = query;
+                    _onSearchChanged(query);
+                  },
+                ),
+              );
             },
           ),
-        );
-      },
+        ),
+      ],
     );
+  }
+
+  String _contentTypeLabel() {
+    if (_contentType == null) return 'All';
+    if (_contentType == 'movie') return 'Movies';
+    if (_contentType == 'tv') return 'TV Shows';
+    return _contentType!;
   }
 }
 
-// New responsive movie card with modern design
+// Keeping the same movie card component as before
 class ResponsiveMovieCard extends StatelessWidget {
   final Movie movie;
   final VoidCallback onTap;

@@ -17,6 +17,7 @@ abstract class WatchmodeApiClient {
     @Query("apiKey") required String apiKey,
     @Query("search_field") required String searchField,
     @Query("search_value") required String searchValue,
+    @Query("types") String? types,
   });
 
   // Autocomplete search
