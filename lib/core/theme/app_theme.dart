@@ -29,7 +29,6 @@ class AppTheme {
     colorScheme: ColorScheme.dark(
       primary: darkPrimary,
       secondary: darkSecondary,
-      background: darkBackground,
       surface: darkCardBackground,
       onPrimary: blackColor,
       onSecondary: whiteColor,
@@ -106,11 +105,9 @@ class AppTheme {
     colorScheme: ColorScheme.light(
       primary: lightPrimary,
       secondary: lightSecondary,
-      background: lightBackground,
       surface: lightCardBackground,
       onPrimary: whiteColor,
       onSecondary: whiteColor,
-      onBackground: lightText,
       onSurface: lightText,
       tertiary: lightSecondaryText,
     ),

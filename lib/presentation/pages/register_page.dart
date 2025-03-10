@@ -6,7 +6,7 @@ import '../widgets/custom_text_field.dart';
 import '../cubit/auth_cubit.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -55,7 +55,8 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             );
           } else if (state is AuthSuccess) {
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+
           }
         }
       },

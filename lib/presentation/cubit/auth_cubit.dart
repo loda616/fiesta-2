@@ -85,14 +85,9 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       final user = await getCurrentUserUseCase(const NoParams());
-      if (user != null) {
-        _currentUser = user as User;
-        emit(AuthSuccess(_currentUser!));
-      } else {
-        _currentUser = null;
-        emit(AuthInitial());
-      }
-    } catch (e) {
+      _currentUser = user as User;
+      emit(AuthSuccess(_currentUser!));
+        } catch (e) {
       emit(AuthError(e.toString()));
       await Future.delayed(const Duration(seconds: 2));
       emit(AuthInitial());

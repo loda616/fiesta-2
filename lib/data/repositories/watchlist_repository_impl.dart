@@ -3,7 +3,7 @@ import '../../core/errors/failures.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/repositories/watchlist_repository.dart';
 import '../datasources/watchlist_firebase_source.dart';
-import '../models/movie_model.dart';
+import '../models/movies/movie_model.dart';
 
 class WatchlistRepositoryImpl implements WatchlistRepository {
   final WatchlistFirebaseSource _firebaseSource;

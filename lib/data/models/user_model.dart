@@ -5,16 +5,11 @@ import '../../domain/entities/user.dart';
 
 class UserModel extends User {
   UserModel({
-    required String id,
-    required String email,
-    String? username,
-    DateTime? createdAt,
-  }) : super(
-    id: id,
-    email: email,
-    username: username,
-    createdAt: createdAt,
-  );
+    required super.id,
+    required super.email,
+    super.username,
+    super.createdAt,
+  });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

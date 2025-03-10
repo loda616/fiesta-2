@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../core/usecases/usecase.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/usecases/get_movies_usecase.dart';
 

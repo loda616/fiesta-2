@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../cubit/movie_details_cubit.dart';
 import '../widgets/movie_recommendations.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../widgets/streaming_sources_section.dart';
+import 'tv_seasons_page.dart';
 
 class MovieDetailsPage extends StatefulWidget {
   final String movieId;
@@ -21,6 +24,15 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
   void initState() {
     super.initState();
     context.read<MovieDetailsCubit>().loadMovieDetails(widget.movieId);
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open $url')),
+      );
+    }
   }
 
   @override
@@ -60,6 +72,10 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
           }
 
           if (state is MovieDetailsLoaded) {
+            final isTvShow = state.movie.type == 'tv_series' ||
+                state.movie.type == 'tv_miniseries' ||
+                state.movie.type == 'tv_special';
+
             return CustomScrollView(
               slivers: [
                 SliverAppBar(
@@ -80,6 +96,34 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                       ),
                     ),
                   ),
+                  actions: [
+                    IconButton(
+                      icon: Icon(
+                        state.isInWatchlist
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                      ),
+                      onPressed: () {
+                        context.read<MovieDetailsCubit>().toggleWatchlist();
+                      },
+                    ),
+                    if (isTvShow)
+                      IconButton(
+                        icon: const Icon(Icons.live_tv),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TvSeasonsPage(
+                                tvShowId: state.movie.watchmodeId ?? '',
+                                title: state.movie.title,
+                              ),
+                            ),
+                          );
+                        },
+                        tooltip: 'View Seasons',
+                      ),
+                  ],
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
@@ -97,16 +141,6 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                state.isInWatchlist
-                                    ? Icons.bookmark
-                                    : Icons.bookmark_border,
-                              ),
-                              onPressed: () {
-                                // Toggle watchlist
-                              },
                             ),
                           ],
                         ),
@@ -133,6 +167,24 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                                 style: TextStyle(fontSize: 16.sp),
                               ),
                             ],
+                            if (isTvShow) ...[
+                              SizedBox(width: 16.w),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  'TV Show',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                         if (state.movie.genre != null) ...[
@@ -146,6 +198,51 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                               label: Text(genre.trim()),
                             ))
                                 .toList(),
+                          ),
+                        ],
+                        if (state.movie.streamingSources != null &&
+                            state.movie.streamingSources!.isNotEmpty) ...[
+                          SizedBox(height: 24.h),
+                          StreamingSourcesSection(
+                            streamingSources: state.movie.streamingSources,
+                            onSeeAllPressed: () {
+                              // Show all streaming sources in a dialog or new page
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('All Streaming Sources'),
+                                  content: SizedBox(
+                                    width: double.maxFinite,
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: state.movie.streamingSources!.length,
+                                      itemBuilder: (context, index) {
+                                        final source = state.movie.streamingSources![index];
+                                        return ListTile(
+                                          title: Text(source.name),
+                                          subtitle: Text(source.type),
+                                          trailing: source.price != null && source.price!.isNotEmpty
+                                              ? Text('\$${source.price}')
+                                              : null,
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            if (source.webUrl.isNotEmpty) {
+                                              _launchUrl(source.webUrl);
+                                            }
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ],
                         if (state.movie.plot != null) ...[
@@ -163,6 +260,29 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                             style: TextStyle(fontSize: 16.sp),
                           ),
                         ],
+
+                        if (isTvShow) ...[
+                          SizedBox(height: 24.h),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.live_tv),
+                            label: const Text('View Seasons & Episodes'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TvSeasonsPage(
+                                    tvShowId: state.movie.watchmodeId ?? '',
+                                    title: state.movie.title,
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(double.infinity, 50.h),
+                            ),
+                          ),
+                        ],
+
                         SizedBox(height: 24.h),
                         MovieRecommendations(
                           recommendations: state.recommendations,

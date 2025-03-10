@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../domain/entities/movie.dart';
 
+
 class MovieGrid extends StatelessWidget {
   final List<Movie> movies;
   final bool isLoading;
@@ -14,13 +15,17 @@ class MovieGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive padding based on screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+    final padding = screenWidth > 600 ? 16.w : 8.w;
+
     return GridView.builder(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(padding),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.65, // Make cards slightly taller for better text display
-        crossAxisSpacing: 16.w,
-        mainAxisSpacing: 16.h,
+        childAspectRatio: 0.7,  // Consistent aspect ratio
+        crossAxisSpacing: padding,
+        mainAxisSpacing: padding,
       ),
       itemCount: movies.length,
       itemBuilder: (context, index) {
@@ -62,25 +67,6 @@ class MovieCard extends StatelessWidget {
                 : Container(
               color: Colors.grey[300],
               child: const Icon(Icons.movie),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  movie.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  movie.year,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
             ),
           ),
         ],

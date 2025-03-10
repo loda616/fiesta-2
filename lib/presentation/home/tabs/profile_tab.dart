@@ -49,10 +49,34 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _handleLogout() async {
-    await context.read<AuthCubit>().signOut();
-    if (!mounted) return;
+    // Show confirmation dialog
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Log Out'),
+          ),
+        ],
+      ),
+    );
 
-    Navigator.pushReplacementNamed(context, '/login');
+    // If user confirmed, proceed with logout
+    if (confirm == true) {
+      await context.read<AuthCubit>().signOut();
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   void _showResetPasswordDialog() {
@@ -225,7 +249,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                            Text(
                           'Dark Theme',
                           style: theme.textTheme.bodyLarge,
                         ),

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
 import 'tabs/home_tab.dart';
 import 'tabs/search_tab.dart';
 import 'tabs/watchlist_tab.dart';
 import 'tabs/profile_tab.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -24,7 +23,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return Scaffold(
       body: _pages[_currentIndex],

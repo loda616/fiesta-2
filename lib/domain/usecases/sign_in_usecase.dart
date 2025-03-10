@@ -1,4 +1,3 @@
-import '../../core/usecases/usecase.dart';
 import '../entities/user.dart';
 import '../repositories/auth_repository.dart';
 

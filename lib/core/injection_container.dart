@@ -2,22 +2,26 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../data/datasources/movie_api_source.dart';
+import 'package:dio/dio.dart';
+
+import '../data/datasources/Watchmode/watchmode_api_client.dart';
+import '../data/datasources/Watchmode/watchmode_api_source.dart';
+import '../data/datasources/Watchmode/rate_limiter.dart';
 import '../data/datasources/search_local_source.dart';
 import '../data/repositories/movie_repository_impl.dart';
 import '../data/repositories/auth_repository_impl.dart';
 import '../domain/repositories/movie_repository.dart';
 import '../domain/repositories/auth_repository.dart';
-import '../domain/usecases/get_current_user_usecase.dart' show GetCurrentUserUseCase;
-import '../domain/usecases/get_movie_details_usecase.dart' show GetMovieDetailsUseCase;
-import '../domain/usecases/get_movie_recommendations_usecase.dart' show GetMovieRecommendationsUseCase;
+import '../domain/usecases/get_current_user_usecase.dart';
+import '../domain/usecases/get_movie_details_usecase.dart';
+import '../domain/usecases/get_movie_recommendations_usecase.dart';
 import '../domain/usecases/get_movies_usecase.dart';
-import '../domain/usecases/sign_in_usecase.dart' show SignInUseCase;
-import '../domain/usecases/sign_out_usecase.dart' show SignOutUseCase;
-import '../domain/usecases/sign_up_usecase.dart' show SignUpUseCase;
+import '../domain/usecases/sign_out_usecase.dart';
+import '../domain/usecases/sign_up_usecase.dart';
 import '../presentation/cubit/auth_cubit.dart';
 import '../presentation/cubit/movie_cubit.dart';
-import 'storage/local_storage.dart';
+import '../presentation/cubit/tv_show_cubit.dart';
+import '../core/storage/local_storage.dart';
 
 final sl = GetIt.instance;
 
@@ -38,8 +42,13 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerFactory(
+        () => TvShowCubit(
+      watchmodeApiSource: sl(),
+    ),
+  );
+
   // Use cases
-  sl.registerLazySingleton(() => SignInUseCase(sl()));
   sl.registerLazySingleton(() => SignUpUseCase(sl()));
   sl.registerLazySingleton(() => SignOutUseCase(sl()));
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
@@ -59,8 +68,17 @@ Future<void> init() async {
         () => MovieRepositoryImpl(sl()),
   );
 
+  // API Dependencies
+  sl.registerLazySingleton(() => Dio());
+  sl.registerLazySingleton(() => WatchmodeApiClient(sl<Dio>()));
+  sl.registerLazySingleton(() => RateLimiter());
+
   // Data sources
-  sl.registerLazySingleton(() => MovieApiSource());
+  sl.registerLazySingleton(() => WatchmodeApiSource(
+    sl<WatchmodeApiClient>(),
+    sl<RateLimiter>(),
+    'wkxtBi0HBskrGYnR4GYbwFhExYY9EyoeZmF36FSO',
+  ));
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();

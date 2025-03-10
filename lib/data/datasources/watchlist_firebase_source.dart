@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import '../models/movie_model.dart';
+import '../models/movies/movie_model.dart';
 
 class WatchlistFirebaseSource {
   final FirebaseFirestore _firestore;
