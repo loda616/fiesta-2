@@ -110,7 +110,13 @@ class _PopularMoviesSectionState extends State<PopularMoviesSection> {
                   final movie = state.movies[index];
                   return MovieCard(
                     movie: movie,
-                    onTap: (){},
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/movie_details',
+                        arguments: movie.watchmodeId ?? movie.imdbId,
+                      );
+                    },
                   );
                 },
               );

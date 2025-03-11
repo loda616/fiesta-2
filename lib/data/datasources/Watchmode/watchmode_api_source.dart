@@ -127,7 +127,6 @@ class WatchmodeApiSource {
       throw ServerException(message: e.toString());
     }
   }
-
   // Helper method to convert IMDB ID to Watchmode ID
   Future<String?> getWatchmodeIdFromImdbId(String imdbId) async {
     try {
@@ -162,6 +161,30 @@ class WatchmodeApiSource {
     }
   }
 
+  Future<List<StreamingSource>> getTitleSources(String watchmodeId) async {
+    return _makeRateLimitedRequest(() async {
+      try {
+        final response = await _client.getTitleSources(
+          titleId: watchmodeId,
+          apiKey: apiKey,
+        );
+
+        return response.map((source) => StreamingSource(
+          id: source.sourceId.toString(),
+          name: source.name,
+          type: source.type,
+          region: source.region,
+          webUrl: source.webUrl,
+          format: source.format,
+          price: source.price?.toString(),
+        )).toList();
+      } on DioException catch (e) {
+        throw ServerException(message: e.message ?? 'Failed to get title sources');
+      } catch (e) {
+        throw ServerException(message: e.toString());
+      }
+    });
+  }
   // Get TV show episodes
   Future<List<dynamic>> getTvShowEpisodes(String watchmodeId) async {
     try {

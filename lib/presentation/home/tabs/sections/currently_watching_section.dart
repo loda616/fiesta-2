@@ -125,7 +125,6 @@ class CurrentlyWatchingSection extends StatelessWidget {
                       child: MovieCard(
                         movie: movie,
                         onTap: () {
-                          // Navigate to movie details
                           Navigator.pushNamed(
                             context,
                             '/movie_details',

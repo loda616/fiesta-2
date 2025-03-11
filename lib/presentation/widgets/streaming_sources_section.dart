@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../domain/entities/movie.dart';
@@ -7,10 +8,10 @@ class StreamingSourcesSection extends StatelessWidget {
   final VoidCallback? onSeeAllPressed;
 
   const StreamingSourcesSection({
-    Key? key,
+    super.key,
     required this.streamingSources,
     this.onSeeAllPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +126,7 @@ class StreamingSourcesSection extends StatelessWidget {
             Text(
               source.name,
               style: TextStyle(
-                color: theme.colorScheme.onBackground,
+                color: theme.colorScheme.onSurface,
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
               ),
@@ -135,7 +136,7 @@ class StreamingSourcesSection extends StatelessWidget {
               Text(
                 '(\$${source.price})',
                 style: TextStyle(
-                  color: theme.colorScheme.onBackground,
+                  color: theme.colorScheme.onSurface,
                   fontSize: 10.sp,
                 ),
               ),

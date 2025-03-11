@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../cubit/movie_details_cubit.dart';
 import '../widgets/movie_recommendations.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../widgets/streaming_sources_section.dart';
 import 'tv_seasons_page.dart';
 
@@ -72,9 +72,10 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
           }
 
           if (state is MovieDetailsLoaded) {
-            final isTvShow = state.movie.type == 'tv_series' ||
-                state.movie.type == 'tv_miniseries' ||
-                state.movie.type == 'tv_special';
+            final movie = state.movie;
+            final isTvShow = movie.type == 'tv_series' ||
+                movie.type == 'tv_miniseries' ||
+                movie.type == 'tv_special';
 
             return CustomScrollView(
               slivers: [
@@ -82,9 +83,29 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                   expandedHeight: 300.h,
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
-                    background: state.movie.poster.isNotEmpty
+                    background: movie.backdrop != null && movie.backdrop!.isNotEmpty
                         ? Image.network(
-                      state.movie.poster,
+                      movie.backdrop!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return movie.poster.isNotEmpty
+                            ? Image.network(
+                          movie.poster,
+                          fit: BoxFit.cover,
+                        )
+                            : Container(
+                          color: Colors.grey[300],
+                          child: Icon(
+                            Icons.movie,
+                            size: 100.sp,
+                            color: Colors.white,
+                          ),
+                        );
+                      },
+                    )
+                        : movie.poster.isNotEmpty
+                        ? Image.network(
+                      movie.poster,
                       fit: BoxFit.cover,
                     )
                         : Container(
@@ -115,8 +136,8 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => TvSeasonsPage(
-                                tvShowId: state.movie.watchmodeId ?? '',
-                                title: state.movie.title,
+                                tvShowId: movie.watchmodeId ?? '',
+                                title: movie.title,
                               ),
                             ),
                           );
@@ -135,7 +156,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                state.movie.title,
+                                movie.title,
                                 style: TextStyle(
                                   fontSize: 24.sp,
                                   fontWeight: FontWeight.bold,
@@ -147,23 +168,23 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                         SizedBox(height: 8.h),
                         Row(
                           children: [
-                            if (state.movie.imdbRating != null) ...[
+                            if (movie.imdbRating != null) ...[
                               Icon(Icons.star, color: Colors.amber, size: 20.sp),
                               SizedBox(width: 4.w),
                               Text(
-                                state.movie.imdbRating!,
+                                movie.imdbRating!,
                                 style: TextStyle(fontSize: 16.sp),
                               ),
                               SizedBox(width: 16.w),
                             ],
                             Text(
-                              state.movie.year,
+                              movie.year,
                               style: TextStyle(fontSize: 16.sp),
                             ),
-                            if (state.movie.runtime != null) ...[
+                            if (movie.runtime != null) ...[
                               SizedBox(width: 16.w),
                               Text(
-                                state.movie.runtime!,
+                                movie.runtime!,
                                 style: TextStyle(fontSize: 16.sp),
                               ),
                             ],
@@ -187,24 +208,23 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                             ],
                           ],
                         ),
-                        if (state.movie.genre != null) ...[
+                        if (movie.genreNames != null && movie.genreNames!.isNotEmpty) ...[
                           SizedBox(height: 16.h),
                           Wrap(
                             spacing: 8.w,
                             runSpacing: 8.h,
-                            children: state.movie.genre!
-                                .split(',')
+                            children: movie.genreNames!
                                 .map((genre) => Chip(
                               label: Text(genre.trim()),
                             ))
                                 .toList(),
                           ),
                         ],
-                        if (state.movie.streamingSources != null &&
-                            state.movie.streamingSources!.isNotEmpty) ...[
+                        if (movie.streamingSources != null &&
+                            movie.streamingSources!.isNotEmpty) ...[
                           SizedBox(height: 24.h),
                           StreamingSourcesSection(
-                            streamingSources: state.movie.streamingSources,
+                            streamingSources: movie.streamingSources,
                             onSeeAllPressed: () {
                               // Show all streaming sources in a dialog or new page
                               showDialog(
@@ -215,9 +235,9 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                                     width: double.maxFinite,
                                     child: ListView.builder(
                                       shrinkWrap: true,
-                                      itemCount: state.movie.streamingSources!.length,
+                                      itemCount: movie.streamingSources!.length,
                                       itemBuilder: (context, index) {
-                                        final source = state.movie.streamingSources![index];
+                                        final source = movie.streamingSources![index];
                                         return ListTile(
                                           title: Text(source.name),
                                           subtitle: Text(source.type),
@@ -245,7 +265,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                             },
                           ),
                         ],
-                        if (state.movie.plot != null) ...[
+                        if (movie.plot != null && movie.plot!.isNotEmpty) ...[
                           SizedBox(height: 16.h),
                           Text(
                             'Plot',
@@ -256,11 +276,23 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                           ),
                           SizedBox(height: 8.h),
                           Text(
-                            state.movie.plot!,
+                            movie.plot!,
                             style: TextStyle(fontSize: 16.sp),
                           ),
                         ],
-
+                        if (movie.trailer != null && movie.trailer!.isNotEmpty) ...[
+                          SizedBox(height: 24.h),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.play_circle_outline),
+                            label: const Text('Watch Trailer'),
+                            onPressed: () {
+                              _launchUrl(movie.trailer!);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(double.infinity, 50.h),
+                            ),
+                          ),
+                        ],
                         if (isTvShow) ...[
                           SizedBox(height: 24.h),
                           ElevatedButton.icon(
@@ -271,8 +303,8 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => TvSeasonsPage(
-                                    tvShowId: state.movie.watchmodeId ?? '',
-                                    title: state.movie.title,
+                                    tvShowId: movie.watchmodeId ?? '',
+                                    title: movie.title,
                                   ),
                                 ),
                               );
