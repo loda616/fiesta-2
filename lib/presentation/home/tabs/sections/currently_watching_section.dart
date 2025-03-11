@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../cubit/movie_cubit.dart';
-import '../widgets/movie_card.dart';
+import '../../../cubit/movie_cubit.dart';
+import '../../widgets/movie_card.dart';
 
 class CurrentlyWatchingSection extends StatelessWidget {
   const CurrentlyWatchingSection({Key? key}) : super(key: key);
@@ -111,6 +111,7 @@ class CurrentlyWatchingSection extends StatelessWidget {
               }
 
               // Show movies in horizontal list
+              // Fixed: Make sure each card has a fixed width
               return ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 scrollDirection: Axis.horizontal,
@@ -119,11 +120,19 @@ class CurrentlyWatchingSection extends StatelessWidget {
                 itemBuilder: (context, index) {
                   if (state is MovieSearchLoaded) {
                     final movie = state.movies[index];
-                    return MovieCard(
-                      movie: movie,
-                      onTap: () {
-                        // Navigate to movie details
-                      },
+                    return SizedBox(
+                      width: 140.w, // Fixed width for card in horizontal list
+                      child: MovieCard(
+                        movie: movie,
+                        onTap: () {
+                          // Navigate to movie details
+                          Navigator.pushNamed(
+                            context,
+                            '/movie_details',
+                            arguments: movie.watchmodeId ?? movie.imdbId,
+                          );
+                        },
+                      ),
                     );
                   }
                   return const SizedBox.shrink();

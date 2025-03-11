@@ -17,7 +17,7 @@ class ResponsiveMovieCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Responsive dimensions
+    // Responsive dimensions with explicit width
     final cardWidth = 160.w;
     final cardHeight = 240.h;
     final borderRadius = 12.r;
@@ -97,8 +97,9 @@ class ResponsiveMovieCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 4.h),
-                      // Year and rating
+                      // Year and rating - Fix: Change Row to use mainAxisSize.min and remove Expanded
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           if (movie.imdbRating != null) ...[
                             Icon(Icons.star, size: 14.sp, color: Colors.amber),

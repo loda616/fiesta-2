@@ -1,6 +1,6 @@
 import 'package:fiesta/presentation/home/tabs/sections/popular_movies_section.dart' show PopularMoviesSection;
 import 'package:flutter/material.dart';
-import '../widgets/currently_watching_section.dart';
+import 'sections/currently_watching_section.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubit/movie_cubit.dart';
 
