@@ -52,7 +52,9 @@ class SearchCubit extends Cubit<SearchState> {
     result.fold(
           (failure) => emit(SearchError(failure.message)),
           (movies) {
-        // Save search query to history
+            for (var movie in movies) {
+              print('Movie: ${movie.title}, Poster URL: ${movie.poster}');
+            }
         _searchLocalSource.addSearchQuery(query);
 
         // Apply filters if provided

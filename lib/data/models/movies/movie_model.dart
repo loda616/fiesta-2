@@ -59,9 +59,8 @@ class MovieModel extends Movie {
       imdbId: result.imdbId ?? '',
       title: result.name,
       year: result.year?.toString() ?? '',
-      poster: '', // Basic search doesn't provide poster
+      poster: '',
       type: result.type,
-      // These fields might not be available in search results
       plot: null,
       runtime: null,
       genre: null,

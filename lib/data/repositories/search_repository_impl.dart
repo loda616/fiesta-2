@@ -45,11 +45,25 @@ class SearchRepositoryImpl implements SearchRepository {
       );
 
       if (response.titleResults != null && response.titleResults!.isNotEmpty) {
-        final movies = response.titleResults!
-            .map((result) => MovieModel.fromWatchmodeJson(result))
-            .toList();
+        final titles = response.titleResults!;
+        final List<Movie> detailedMovies = [];
 
-        return Right(movies);
+        for (var title in titles.take(10)) { // Limit to top 10 for performance
+          try {
+            // Get detailed information including poster
+            final detailsResponse = await _client.getTitleDetails(
+              titleId: title.id.toString(),
+              apiKey: apiKey,
+            );
+
+            detailedMovies.add(MovieModel.fromWatchmodeDetailJson(detailsResponse));
+          } catch (e) {
+            // If details fail, add basic info
+            detailedMovies.add(MovieModel.fromWatchmodeJson(title));
+          }
+        }
+
+        return Right(detailedMovies);
       }
 
       return const Right([]);
