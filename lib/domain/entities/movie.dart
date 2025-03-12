@@ -1,7 +1,8 @@
+
 class StreamingSource {
   final String id;
   final String name;
-  final String type; // sub, buy, free, etc.
+  final String type;
   final String region;
   final String webUrl;
   final String format;
@@ -36,6 +37,14 @@ class Movie {
   final List<StreamingSource>? streamingSources;
   final String? type; // 'movie', 'tv_series', 'tv_miniseries', 'tv_special', etc.
 
+  // Additional fields for detailed view
+  final String? trailer;
+  final String? backdrop;
+  final List<String>? genreNames;
+  final String? releaseDate;
+  final double? userRating;
+  final int? runtimeMinutes;
+
   Movie({
     required this.imdbId,
     required this.title,
@@ -51,5 +60,11 @@ class Movie {
     this.watchmodeId,
     this.streamingSources,
     this.type,
+    this.trailer,
+    this.backdrop,
+    this.genreNames,
+    this.releaseDate,
+    this.userRating,
+    this.runtimeMinutes,
   });
 }

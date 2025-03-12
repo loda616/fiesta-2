@@ -8,7 +8,7 @@ class GetMovieDetailsUseCase {
 
   GetMovieDetailsUseCase(this.repository);
 
-  Future<Either<Failure, Movie>> call(String imdbId) {
-    return repository.getMovieDetails(imdbId);
+  Future<Either<Failure, Movie>> call(String movieId) {
+    return repository.getMovieDetails(movieId);
   }
 }

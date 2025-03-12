@@ -19,6 +19,12 @@ class MovieModel extends Movie {
     String? watchmodeId,
     List<StreamingSource>? streamingSources,
     String? type,
+    String? trailer,
+    String? backdrop,
+    List<String>? genreNames,
+    String? releaseDate,
+    double? userRating,
+    int? runtimeMinutes,
   }) : super(
     imdbId: imdbId,
     title: title,
@@ -34,7 +40,60 @@ class MovieModel extends Movie {
     watchmodeId: watchmodeId,
     streamingSources: streamingSources,
     type: type,
+    trailer: trailer,
+    backdrop: backdrop,
+    genreNames: genreNames,
+    releaseDate: releaseDate,
+    userRating: userRating,
+    runtimeMinutes: runtimeMinutes,
   );
+
+  // Add a copyWith method to create a new instance with updated fields
+  MovieModel copyWith({
+    String? imdbId,
+    String? title,
+    String? year,
+    String? poster,
+    String? plot,
+    String? runtime,
+    String? genre,
+    String? director,
+    String? actors,
+    String? imdbRating,
+    bool? isInWatchlist,
+    String? watchmodeId,
+    List<StreamingSource>? streamingSources,
+    String? type,
+    String? trailer,
+    String? backdrop,
+    List<String>? genreNames,
+    String? releaseDate,
+    double? userRating,
+    int? runtimeMinutes,
+  }) {
+    return MovieModel(
+      imdbId: imdbId ?? this.imdbId,
+      title: title ?? this.title,
+      year: year ?? this.year,
+      poster: poster ?? this.poster,
+      plot: plot ?? this.plot,
+      runtime: runtime ?? this.runtime,
+      genre: genre ?? this.genre,
+      director: director ?? this.director,
+      actors: actors ?? this.actors,
+      imdbRating: imdbRating ?? this.imdbRating,
+      isInWatchlist: isInWatchlist ?? this.isInWatchlist,
+      watchmodeId: watchmodeId ?? this.watchmodeId,
+      streamingSources: streamingSources ?? this.streamingSources,
+      type: type ?? this.type,
+      trailer: trailer ?? this.trailer,
+      backdrop: backdrop ?? this.backdrop,
+      genreNames: genreNames ?? this.genreNames,
+      releaseDate: releaseDate ?? this.releaseDate,
+      userRating: userRating ?? this.userRating,
+      runtimeMinutes: runtimeMinutes ?? this.runtimeMinutes,
+    );
+  }
 
   // Original fromJson method for OMDB (keep for backward compatibility)
   factory MovieModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +108,9 @@ class MovieModel extends Movie {
       director: json['Director'],
       actors: json['Actors'],
       imdbRating: json['imdbRating'],
+      watchmodeId: json['watchmodeId'],
+      trailer: json['trailer'],
+      backdrop: json['backdrop'],
     );
   }
 
@@ -59,8 +121,9 @@ class MovieModel extends Movie {
       imdbId: result.imdbId ?? '',
       title: result.name,
       year: result.year?.toString() ?? '',
-      poster: '',
+      poster: '', // Basic search doesn't provide poster
       type: result.type,
+      // These fields might not be available in search results
       plot: null,
       runtime: null,
       genre: null,
@@ -86,6 +149,12 @@ class MovieModel extends Movie {
       )).toList();
     }
 
+    // Generate genre string from genre names
+    String? genreString;
+    if (json.genreNames != null && json.genreNames!.isNotEmpty) {
+      genreString = json.genreNames!.join(', ');
+    }
+
     return MovieModel(
       watchmodeId: json.id.toString(),
       imdbId: json.imdbId ?? '',
@@ -94,13 +163,19 @@ class MovieModel extends Movie {
       poster: json.poster ?? '',
       plot: json.plotOverview,
       runtime: json.runtimeMinutes != null ? '${json.runtimeMinutes} min' : null,
-      genre: json.genreNames != null ? json.genreNames!.join(', ') : null,
+      genre: genreString,
       // For director and actors, we would need to make separate calls to cast-crew endpoint
       director: null,
       actors: null,
       imdbRating: json.userRating?.toString(),
       streamingSources: streamingSources,
       type: json.type,
+      trailer: json.trailer,
+      backdrop: json.backdrop,
+      genreNames: json.genreNames,
+      releaseDate: json.releaseDate,
+      userRating: json.userRating,
+      runtimeMinutes: json.runtimeMinutes,
     );
   }
 
@@ -117,6 +192,8 @@ class MovieModel extends Movie {
       'Actors': actors,
       'imdbRating': imdbRating,
       'watchmodeId': watchmodeId,
+      'trailer': trailer,
+      'backdrop': backdrop,
     };
   }
 }

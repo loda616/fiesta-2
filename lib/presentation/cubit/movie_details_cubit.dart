@@ -1,8 +1,7 @@
-import 'package:fiesta/domain/usecases/get_movie_recommendations_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/usecases/get_movie_details_usecase.dart';
-
+import '../../domain/usecases/get_movie_recommendations_usecase.dart';
 
 abstract class MovieDetailsState {}
 

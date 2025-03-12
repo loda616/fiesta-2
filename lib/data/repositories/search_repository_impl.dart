@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
