@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart' show Either, Left, Right;
-import 'package:fiesta/domain/usecases/sign_in_usecase.dart' show SignInParams;
 import '../../core/errors/failures.dart' show Failure, ServerFailure;
 import '../../core/usecases/usecase.dart';
 import '../entities/user.dart';

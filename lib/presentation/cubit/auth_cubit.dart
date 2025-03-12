@@ -1,13 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/usecases/usecase.dart' show NoParams;
-import '../../domain/entities/user.dart';
 import '../../domain/usecases/get_current_user_usecase.dart' show GetCurrentUserUseCase;
 import '../../domain/usecases/sign_in_usecase.dart' show SignInParams, SignInUseCase;
 import '../../domain/usecases/sign_out_usecase.dart' show SignOutUseCase;
 import '../../domain/usecases/sign_up_usecase.dart' show SignUpParams, SignUpUseCase;
 import 'auth_states.dart' show AuthError, AuthInitial, AuthLoading, AuthState, AuthSuccess;
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 class AuthCubit extends Cubit<AuthState> {
@@ -24,7 +21,6 @@ class AuthCubit extends Cubit<AuthState> {
   }) : super(AuthInitial());
 
   // Track current user for easier access
-  User? _currentUser;
 
   Future<void> signIn({
     required String email,
@@ -39,7 +35,6 @@ class AuthCubit extends Cubit<AuthState> {
       result.fold(
               (failure) => emit(AuthError(failure.message)),
               (user) {
-            _currentUser = user;
             emit(AuthSuccess(user));
           }
       );
@@ -66,7 +61,6 @@ class AuthCubit extends Cubit<AuthState> {
       result.fold(
               (failure) => emit(AuthError(failure.message)),
               (user) {
-            _currentUser = user;
             emit(AuthSuccess(user));
           }
       );
@@ -101,7 +95,6 @@ class AuthCubit extends Cubit<AuthState> {
               (failure) => emit(AuthInitial()),
               (user) {
             if (user != null) {
-              _currentUser = user;
               emit(AuthSuccess(user));
             } else {
               emit(AuthInitial());
