@@ -123,6 +123,7 @@ class CurrentlyWatchingSection extends StatelessWidget {
                     return SizedBox(
                       width: 140.w, // Fixed width for card in horizontal list
                       child: MovieCard(
+                        key: ValueKey(movie.imdbId),
                         movie: movie,
                         onTap: () {
                           Navigator.pushNamed(

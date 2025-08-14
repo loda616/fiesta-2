@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import '../../core/constants/app_strings.dart';
 import '../models/movies/movie_model.dart';
 
 class WatchlistFirebaseSource {
@@ -19,12 +20,12 @@ class WatchlistFirebaseSource {
     await _firestore
         .collection('users')
         .doc(userId)
-        .collection('watchlist')
+        .collection(AppStrings.watchlist)
         .doc(movie.imdbId)
         .set({
       ...movie.toJson(),
       'addedAt': FieldValue.serverTimestamp(),
-      'watched': false,
+      AppStrings.watched: false,
     });
   }
 
@@ -35,7 +36,7 @@ class WatchlistFirebaseSource {
     await _firestore
         .collection('users')
         .doc(userId)
-        .collection('watchlist')
+        .collection(AppStrings.watchlist)
         .doc(movieId)
         .delete();
   }
@@ -47,9 +48,9 @@ class WatchlistFirebaseSource {
     await _firestore
         .collection('users')
         .doc(userId)
-        .collection('watchlist')
+        .collection(AppStrings.watchlist)
         .doc(movieId)
-        .update({'watched': watched});
+        .update({AppStrings.watched: watched});
   }
 
   Stream<List<MovieModel>> getWatchlist() {
@@ -59,7 +60,7 @@ class WatchlistFirebaseSource {
     return _firestore
         .collection('users')
         .doc(userId)
-        .collection('watchlist')
+        .collection(AppStrings.watchlist)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../core/constants/app_strings.dart';
 import '../models/user_model.dart';
 
 class UserRepository {
@@ -21,13 +22,13 @@ class UserRepository {
 
   Future<void> updateWatchlist(String userId, List<String> watchlist) async {
     await _firestore.collection('users').doc(userId).update({
-      'watchlist': watchlist,
+      AppStrings.watchlist: watchlist,
     });
   }
 
   Future<void> updateWatched(String userId, List<String> watched) async {
     await _firestore.collection('users').doc(userId).update({
-      'watched': watched,
+      AppStrings.watched: watched,
     });
   }
 }

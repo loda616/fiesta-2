@@ -1,8 +1,15 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/constants/app_strings.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/usecases/get_movies_usecase.dart';
 
-abstract class MovieState {}
+abstract class MovieState extends Equatable {
+  const MovieState();
+
+  @override
+  List<Object> get props => [];
+}
 
 class MovieInitial extends MovieState {}
 
@@ -10,23 +17,35 @@ class MovieLoading extends MovieState {}
 
 class MovieError extends MovieState {
   final String message;
-  MovieError(this.message);
+  const MovieError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }
 
 class SearchResultsLoaded extends MovieState {
   final List<Movie> movies;
-  SearchResultsLoaded(this.movies);
+  const SearchResultsLoaded(this.movies);
+
+  @override
+  List<Object> get props => [movies];
 }
 
 class PopularMoviesLoaded extends MovieState {
   final List<Movie> movies;
-  PopularMoviesLoaded(this.movies);
+  const PopularMoviesLoaded(this.movies);
+
+  @override
+  List<Object> get props => [movies];
 }
 
 class MovieWatchlistLoaded extends MovieState {
   final List<Movie> movies;
   final bool isWatched;
-  MovieWatchlistLoaded(this.movies, {required this.isWatched});
+  const MovieWatchlistLoaded(this.movies, {required this.isWatched});
+
+  @override
+  List<Object> get props => [movies, isWatched];
 }
 
 class MovieCubit extends Cubit<MovieState> {
@@ -62,17 +81,17 @@ class MovieCubit extends Cubit<MovieState> {
 
         if (sortBy != null) {
           switch (sortBy) {
-            case 'Rating':
+            case AppStrings.rating:
               filteredMovies.sort((a, b) {
                 final aRating = double.tryParse(a.imdbRating ?? '0') ?? 0;
                 final bRating = double.tryParse(b.imdbRating ?? '0') ?? 0;
                 return bRating.compareTo(aRating);
               });
               break;
-            case 'Year':
+            case AppStrings.year:
               filteredMovies.sort((a, b) => b.year.compareTo(a.year));
               break;
-            case 'Title':
+            case AppStrings.title:
               filteredMovies.sort((a, b) => a.title.compareTo(b.title));
               break;
           }
@@ -88,7 +107,7 @@ class MovieCubit extends Cubit<MovieState> {
 
     try {
       // Get currently watching movies from Firestore
-      final movies = await getMovies('currentlyWatching');
+      final movies = await getMovies(AppStrings.currentlyWatching);
       movies.fold(
             (failure) => emit(MovieError(failure.message)),
             (movies) => emit(SearchResultsLoaded(movies)),
@@ -103,7 +122,7 @@ class MovieCubit extends Cubit<MovieState> {
 
     try {
       // Get watchlist from Firestore based on isWatched status
-      final movies = await getMovies(isWatched ? 'watched' : 'watchlist');
+      final movies = await getMovies(isWatched ? AppStrings.watched : AppStrings.watchlist);
       movies.fold(
             (failure) => emit(MovieError(failure.message)),
             (movies) => emit(MovieWatchlistLoaded(movies, isWatched: isWatched)),
@@ -117,7 +136,7 @@ class MovieCubit extends Cubit<MovieState> {
     emit(MovieLoading());
 
     try {
-      final movies = await getMovies('popular');
+      final movies = await getMovies(AppStrings.popular);
       movies.fold(
             (failure) => emit(MovieError(failure.message)),
             (movies) => emit(PopularMoviesLoaded(movies)),

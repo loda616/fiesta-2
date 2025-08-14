@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../core/constants/app_strings.dart';
 import '../../../data/datasources/search_local_source.dart' show SearchLocalSource;
 import '../../../domain/entities/movie.dart' show Movie;
 import '../../../domain/usecases/search_use_case.dart' show SearchUseCase;
@@ -75,14 +76,14 @@ class SearchCubit extends Cubit<SearchState> {
         // Apply sorting
         if (sortBy != null) {
           switch (sortBy) {
-            case 'Rating':
+            case AppStrings.rating:
               filteredMovies.sort((a, b) =>
                   (b.imdbRating ?? '0').compareTo(a.imdbRating ?? '0'));
               break;
-            case 'Year':
+            case AppStrings.year:
               filteredMovies.sort((a, b) => b.year.compareTo(a.year));
               break;
-            case 'Title':
+            case AppStrings.title:
               filteredMovies.sort((a, b) => a.title.compareTo(b.title));
               break;
           }

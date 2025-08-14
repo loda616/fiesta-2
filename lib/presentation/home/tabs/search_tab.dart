@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/constants/app_strings.dart';
 import '../../../domain/entities/movie.dart' show Movie;
 import '../../cubit/movie_cubit.dart';
 import '../../widgets/empty_state.dart' show EmptyState;
@@ -23,7 +24,7 @@ class _SearchTabState extends State<SearchTab> {
   Timer? _debounce;
   String _selectedGenre = 'All';
   String _selectedYear = 'All';
-  String _sortBy = 'Rating';
+  String _sortBy = AppStrings.rating;
   String? _contentType;
 
   @override

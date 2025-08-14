@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Core imports
-import 'core/injection_container.dart' show sl;
+import 'di/injection.dart' show init, sl;
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/routes/app_router.dart';
@@ -82,12 +82,6 @@ class MyApp extends StatelessWidget {
                   themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
                   initialRoute: AppRouter.splash,
                   onGenerateRoute: AppRouter.onGenerateRoute,
-                  builder: (context, widget) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
-                      child: widget!,
-                    );
-                  },
                 );
               },
             ),

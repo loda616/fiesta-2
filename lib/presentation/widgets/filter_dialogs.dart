@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_strings.dart';
 
 class FilterDialogs {
   static void showGenreFilter(BuildContext context, String currentGenre, Function(String) onSelect) {
@@ -71,9 +72,9 @@ class FilterDialogs {
 
   static void showSortOptions(BuildContext context, String currentSort, Function(String) onSelect) {
     final sortOptions = [
-      'Rating',
-      'Year',
-      'Title',
+      AppStrings.rating,
+      AppStrings.year,
+      AppStrings.title,
     ];
 
     showDialog(

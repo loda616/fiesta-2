@@ -6,19 +6,8 @@ import '../../../cubit/movie_cubit.dart' show MovieCubit, MovieError, MovieLoadi
 import '../../widgets/movie_card.dart' show MovieCard;
 
 
-class PopularMoviesSection extends StatefulWidget {
+class PopularMoviesSection extends StatelessWidget {
   const PopularMoviesSection({Key? key}) : super(key: key);
-
-  @override
-  State<PopularMoviesSection> createState() => _PopularMoviesSectionState();
-}
-
-class _PopularMoviesSectionState extends State<PopularMoviesSection> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<MovieCubit>().loadPopularMovies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +98,7 @@ class _PopularMoviesSectionState extends State<PopularMoviesSection> {
                 itemBuilder: (context, index) {
                   final movie = state.movies[index];
                   return MovieCard(
+                    key: ValueKey(movie.imdbId),
                     movie: movie,
                     onTap: () {
                       Navigator.pushNamed(

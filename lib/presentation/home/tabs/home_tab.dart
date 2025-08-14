@@ -5,8 +5,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubit/movie_cubit.dart';
 
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   const HomeTab({Key? key}) : super(key: key);
+
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    final movieCubit = context.read<MovieCubit>();
+    movieCubit.loadCurrentlyWatching();
+    movieCubit.loadPopularMovies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,4 +55,3 @@ class HomeTab extends StatelessWidget {
     );
   }
 }
-
