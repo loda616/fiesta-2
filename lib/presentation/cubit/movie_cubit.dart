@@ -13,9 +13,14 @@ class MovieError extends MovieState {
   MovieError(this.message);
 }
 
-class MovieSearchLoaded extends MovieState {
+class SearchResultsLoaded extends MovieState {
   final List<Movie> movies;
-  MovieSearchLoaded(this.movies);
+  SearchResultsLoaded(this.movies);
+}
+
+class PopularMoviesLoaded extends MovieState {
+  final List<Movie> movies;
+  PopularMoviesLoaded(this.movies);
 }
 
 class MovieWatchlistLoaded extends MovieState {
@@ -70,7 +75,7 @@ class MovieCubit extends Cubit<MovieState> {
           }
         }
 
-        emit(MovieSearchLoaded(filteredMovies));
+        emit(SearchResultsLoaded(filteredMovies));
       },
     );
   }
@@ -83,7 +88,7 @@ class MovieCubit extends Cubit<MovieState> {
       final movies = await getMovies('currentlyWatching');
       movies.fold(
             (failure) => emit(MovieError(failure.message)),
-            (movies) => emit(MovieSearchLoaded(movies)),
+            (movies) => emit(SearchResultsLoaded(movies)),
       );
     } catch (e) {
       emit(MovieError(e.toString()));
@@ -112,7 +117,7 @@ class MovieCubit extends Cubit<MovieState> {
       final movies = await getMovies('popular');
       movies.fold(
             (failure) => emit(MovieError(failure.message)),
-            (movies) => emit(MovieSearchLoaded(movies)),
+            (movies) => emit(PopularMoviesLoaded(movies)),
       );
     } catch (e) {
       emit(MovieError(e.toString()));

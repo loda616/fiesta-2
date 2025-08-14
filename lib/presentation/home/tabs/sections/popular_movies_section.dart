@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import '../../../cubit/movie_cubit.dart' show MovieCubit, MovieError, MovieLoading, MovieSearchLoaded, MovieState;
+import '../../../cubit/movie_cubit.dart' show MovieCubit, MovieError, MovieLoading, PopularMoviesLoaded, MovieState;
 import '../../widgets/movie_card.dart' show MovieCard;
 
 
@@ -94,7 +94,7 @@ class _PopularMoviesSectionState extends State<PopularMoviesSection> {
               );
             }
 
-            if (state is MovieSearchLoaded) {
+            if (state is PopularMoviesLoaded) {
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

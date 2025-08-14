@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../data/datasources/Watchmode/watchmode_api_client.dart';
 import '../data/datasources/Watchmode/watchmode_api_source.dart';
@@ -55,7 +56,7 @@ Future<void> init() async {
       WatchmodeApiSource(
         sl<WatchmodeApiClient>(),
         sl<RateLimiter>(),
-        'wkxtBi0HBskrGYnR4GYbwFhExYY9EyoeZmF36FSO',
+        dotenv.env['API_KEY']!,
       ),
     );
 
@@ -75,7 +76,7 @@ Future<void> init() async {
       SearchRepositoryImpl(
         sl<WatchmodeApiClient>(),
         sl<RateLimiter>(),
-        'wkxtBi0HBskrGYnR4GYbwFhExYY9EyoeZmF36FSO',
+        dotenv.env['API_KEY']!,
       ),
     );
 

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../domain/entities/movie.dart' show Movie;
-import '../../cubit/Search/search_cubit.dart';
+import '../../cubit/movie_cubit.dart';
 import '../../widgets/empty_state.dart' show EmptyState;
 import '../../widgets/error_view.dart';
 import '../../widgets/filter_dialogs.dart' show FilterDialogs;
@@ -37,9 +37,8 @@ class _SearchTabState extends State<SearchTab> {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (query.isNotEmpty) {
-        context.read<SearchCubit>().searchContent(
+        context.read<MovieCubit>().searchMovies(
           query,
-          contentType: _contentType,
           genre: _selectedGenre == 'All' ? null : _selectedGenre,
           year: _selectedYear == 'All' ? null : _selectedYear,
           sortBy: _sortBy,
@@ -178,7 +177,7 @@ class _SearchTabState extends State<SearchTab> {
                       icon: const Icon(Icons.clear),
                       onPressed: () {
                         _searchController.clear();
-                        context.read<SearchCubit>().resetState();
+                        context.read<MovieCubit>().resetState();
                         setState(() {});
                       },
                     ),
@@ -229,18 +228,18 @@ class _SearchTabState extends State<SearchTab> {
           ),
         ),
         Expanded(
-          child: BlocBuilder<SearchCubit, SearchState>(
+          child: BlocBuilder<MovieCubit, MovieState>(
             builder: (context, state) {
-              if (state is SearchLoading) {
+              if (state is MovieLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (state is SearchError) {
+              if (state is MovieError) {
                 return ErrorView(
                   message: state.message,
                   onRetry: () => _onSearchChanged(_searchController.text),
                 );
               }
-              if (state is SearchLoaded) {
+              if (state is SearchResultsLoaded) {
                 if (state.movies.isEmpty) {
                   return const EmptyState(
                     message: 'No movies found',
@@ -249,7 +248,10 @@ class _SearchTabState extends State<SearchTab> {
                 }
                 return _buildMovieGrid(state.movies);
               }
-              return _buildSearchHistory();
+              return const EmptyState(
+                message: 'Search for movies',
+                icon: Icons.search,
+              );
             },
           ),
         ),
@@ -281,75 +283,6 @@ class _SearchTabState extends State<SearchTab> {
           },
         );
       },
-    );
-  }
-
-  Widget _buildSearchHistory() {
-    final searchHistory = context.read<SearchCubit>().getSearchHistory();
-    if (searchHistory.isEmpty) {
-      return const EmptyState(
-        message: 'Search for movies',
-        icon: Icons.search,
-      );
-    }
-
-    // Use ListView.builder with proper padding
-    final screenWidth = MediaQuery.of(context).size.width;
-    final padding = screenWidth > 600 ? 16.0 : 8.0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.all(padding),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Recent Searches',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.read<SearchCubit>().clearSearchHistory();
-                },
-                child: const Text('Clear'),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.all(padding),
-            itemCount: searchHistory.length,
-            itemBuilder: (context, index) {
-              final query = searchHistory[index];
-              return ListTile(
-                dense: screenWidth < 360, // More compact on very small screens
-                leading: const Icon(Icons.history),
-                title: Text(
-                  query,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () {
-                  _searchController.text = query;
-                  _onSearchChanged(query);
-                },
-                trailing: IconButton(
-                  icon: const Icon(Icons.north_west),
-                  onPressed: () {
-                    _searchController.text = query;
-                    _onSearchChanged(query);
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 
