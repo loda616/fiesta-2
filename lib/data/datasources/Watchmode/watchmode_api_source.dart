@@ -41,27 +41,10 @@ class WatchmodeApiSource {
         );
 
         if (response.titleResults != null && response.titleResults!.isNotEmpty) {
-          final titles = response.titleResults!;
-          // Get details for the first 10 results to get more information
-          final List<Movie> detailedMovies = [];
-
-          for (var title in titles.take(10)) {
-            try {
-              // Get detailed information for each title
-              final detailsResponse = await _client.getTitleDetails(
-                titleId: title.id.toString(),
-                apiKey: apiKey,
-                appendToResponse: 'sources',
-              );
-
-              detailedMovies.add(MovieModel.fromWatchmodeDetailJson(detailsResponse));
-            } catch (e) {
-              // If we can't get details, still include basic info
-              detailedMovies.add(MovieModel.fromWatchmodeJson(title));
-            }
-          }
-
-          return detailedMovies;
+          final movies = response.titleResults!
+              .map((title) => MovieModel.fromWatchmodeJson(title))
+              .toList();
+          return movies;
         }
         return [];
       } on DioException catch (e) {
@@ -92,32 +75,15 @@ class WatchmodeApiSource {
 
   Future<List<Movie>> getMovieRecommendations(String watchmodeId) async {
     try {
-      // Get title details to access similar_titles
-      final details = await _client.getTitleDetails(
+      final similarTitles = await _client.getSimilarTitles(
         titleId: watchmodeId,
         apiKey: apiKey,
       );
 
-      if (details.similarTitles != null && details.similarTitles!.isNotEmpty) {
-        // Take only the first 5 recommendations to limit API calls
-        final similarIds = details.similarTitles!.take(5).toList();
-
-        List<Movie> recommendations = [];
-        // Fetch details for each similar title
-        for (var id in similarIds) {
-          try {
-            final recommendationResponse = await _client.getTitleDetails(
-              titleId: id.toString(),
-              apiKey: apiKey,
-            );
-
-            recommendations.add(MovieModel.fromWatchmodeDetailJson(recommendationResponse));
-          } catch (e) {
-            // Skip if one recommendation fails
-            continue;
-          }
-        }
-
+      if (similarTitles.isNotEmpty) {
+        final recommendations = similarTitles
+            .map((title) => MovieModel.fromWatchmodeJson(title))
+            .toList();
         return recommendations;
       }
       return [];
