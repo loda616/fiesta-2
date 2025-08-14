@@ -74,24 +74,26 @@ class WatchmodeApiSource {
   }
 
   Future<List<Movie>> getMovieRecommendations(String watchmodeId) async {
-    try {
-      final similarTitles = await _client.getSimilarTitles(
-        titleId: watchmodeId,
-        apiKey: apiKey,
-      );
+    return _makeRateLimitedRequest(() async {
+      try {
+        final similarTitles = await _client.getSimilarTitles(
+          titleId: watchmodeId,
+          apiKey: apiKey,
+        );
 
-      if (similarTitles.isNotEmpty) {
-        final recommendations = similarTitles
-            .map((title) => MovieModel.fromWatchmodeJson(title))
-            .toList();
-        return recommendations;
+        if (similarTitles.isNotEmpty) {
+          final recommendations = similarTitles
+              .map((title) => MovieModel.fromWatchmodeJson(title))
+              .toList();
+          return recommendations;
+        }
+        return [];
+      } on DioException catch (e) {
+        throw ServerException(message: e.message ?? 'Failed to get recommendations');
+      } catch (e) {
+        throw ServerException(message: e.toString());
       }
-      return [];
-    } on DioException catch (e) {
-      throw ServerException(message: e.message ?? 'Failed to get recommendations');
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
+    });
   }
   // Helper method to convert IMDB ID to Watchmode ID
   Future<String?> getWatchmodeIdFromImdbId(String imdbId) async {

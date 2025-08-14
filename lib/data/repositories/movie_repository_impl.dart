@@ -66,16 +66,16 @@ class MovieRepositoryImpl implements MovieRepository {
       }
 
       // Fetch the movie details using the Watchmode ID
-      final movie = await apiSource.getMovieDetails(watchmodeId);
+      var movie = await apiSource.getMovieDetails(watchmodeId);
 
       // Fetch streaming sources if available
-
+      try {
         final sources = await apiSource.getTitleSources(watchmodeId);
         if (sources.isNotEmpty) {
           // Add streaming sources to the movie
-
+          movie = (movie as MovieModel).copyWith(streamingSources: sources);
         }
-       {
+      } catch (e) {
          print('Failed to get streaming sources: $e');
       }
 

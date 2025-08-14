@@ -63,8 +63,11 @@ class MovieCubit extends Cubit<MovieState> {
         if (sortBy != null) {
           switch (sortBy) {
             case 'Rating':
-              filteredMovies.sort((a, b) =>
-                  (b.imdbRating ?? '0').compareTo(a.imdbRating ?? '0'));
+              filteredMovies.sort((a, b) {
+                final aRating = double.tryParse(a.imdbRating ?? '0') ?? 0;
+                final bRating = double.tryParse(b.imdbRating ?? '0') ?? 0;
+                return bRating.compareTo(aRating);
+              });
               break;
             case 'Year':
               filteredMovies.sort((a, b) => b.year.compareTo(a.year));
