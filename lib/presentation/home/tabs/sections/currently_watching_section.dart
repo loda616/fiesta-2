@@ -81,7 +81,7 @@ class CurrentlyWatchingSection extends StatelessWidget {
                 );
               }
 
-              if (state is MovieSearchLoaded && state.movies.isEmpty) {
+              if (state is SearchResultsLoaded && state.movies.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -115,10 +115,10 @@ class CurrentlyWatchingSection extends StatelessWidget {
               return ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 scrollDirection: Axis.horizontal,
-                itemCount: state is MovieSearchLoaded ? state.movies.length : 0,
+                itemCount: state is SearchResultsLoaded ? state.movies.length : 0,
                 separatorBuilder: (context, index) => SizedBox(width: 16.w),
                 itemBuilder: (context, index) {
-                  if (state is MovieSearchLoaded) {
+                  if (state is SearchResultsLoaded) {
                     final movie = state.movies[index];
                     return SizedBox(
                       width: 140.w, // Fixed width for card in horizontal list

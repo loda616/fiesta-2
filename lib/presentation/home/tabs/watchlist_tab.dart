@@ -98,7 +98,7 @@ class _WatchlistGrid extends StatelessWidget {
           );
         }
 
-        if (state is MovieSearchLoaded && state.movies.isEmpty) {
+        if (state is MovieWatchlistLoaded && state.movies.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -135,9 +135,9 @@ class _WatchlistGrid extends StatelessWidget {
             crossAxisSpacing: 16.w,
             mainAxisSpacing: 16.h,
           ),
-          itemCount: state is MovieSearchLoaded ? state.movies.length : 0,
+          itemCount: state is MovieWatchlistLoaded ? state.movies.length : 0,
           itemBuilder: (context, index) {
-            if (state is MovieSearchLoaded) {
+            if (state is MovieWatchlistLoaded) {
               final movie = state.movies[index];
               return MovieCard(
                 movie: movie,
