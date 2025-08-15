@@ -28,10 +28,11 @@ void main() async {
     // Initialize Firebase
     await Firebase.initializeApp();
 
+    // Load environment variables
+    await dotenv.load(fileName: "env.txt");
+
     // Initialize dependency injection
     await init();
-
-    await dotenv.load(fileName: "env.env");
 
     runApp(const MyApp());
   } catch (e) {
