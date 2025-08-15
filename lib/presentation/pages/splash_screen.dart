@@ -15,8 +15,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Add delay before checking auth state
-    Future.delayed(const Duration(seconds: 2), () {
+    // Check auth state immediately
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<AuthCubit>().checkAuthState();
       }

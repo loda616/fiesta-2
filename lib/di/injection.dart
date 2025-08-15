@@ -43,17 +43,17 @@ Future<void> init() async {
     sl.registerSingleton<SharedPreferences>(sharedPreferences);
     sl.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
     sl.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
-    sl.registerSingleton<Dio>(Dio());
+    sl.registerLazySingleton<Dio>(() => Dio());
 
     // Core
-    sl.registerSingleton<LocalStorage>(LocalStorage(sl<SharedPreferences>()));
-    sl.registerSingleton<SearchLocalSource>(SearchLocalSource(sl<SharedPreferences>()));
-    sl.registerSingleton<RateLimiter>(RateLimiter());
+    sl.registerLazySingleton<LocalStorage>(() => LocalStorage(sl<SharedPreferences>()));
+    sl.registerLazySingleton<SearchLocalSource>(() => SearchLocalSource(sl<SharedPreferences>()));
+    sl.registerLazySingleton<RateLimiter>(() => RateLimiter());
 
     // API Client
-    sl.registerSingleton<WatchmodeApiClient>(WatchmodeApiClient(sl<Dio>()));
-    sl.registerSingleton<WatchmodeApiSource>(
-      WatchmodeApiSource(
+    sl.registerLazySingleton<WatchmodeApiClient>(() => WatchmodeApiClient(sl<Dio>()));
+    sl.registerLazySingleton<WatchmodeApiSource>(
+      () => WatchmodeApiSource(
         sl<WatchmodeApiClient>(),
         sl<RateLimiter>(),
         dotenv.env['API_KEY']!,
@@ -61,19 +61,19 @@ Future<void> init() async {
     );
 
     // Repositories
-    sl.registerSingleton<AuthRepository>(
-      AuthRepositoryImpl(
+    sl.registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(
         firebaseAuth: sl<FirebaseAuth>(),
         firestore: sl<FirebaseFirestore>(),
       ),
     );
 
-    sl.registerSingleton<MovieRepository>(
-      MovieRepositoryImpl(sl<WatchmodeApiSource>()),
+    sl.registerLazySingleton<MovieRepository>(
+      () => MovieRepositoryImpl(sl<WatchmodeApiSource>()),
     );
 
-    sl.registerSingleton<SearchRepository>(
-      SearchRepositoryImpl(
+    sl.registerLazySingleton<SearchRepository>(
+      () => SearchRepositoryImpl(
         sl<WatchmodeApiClient>(),
         sl<RateLimiter>(),
         dotenv.env['API_KEY']!,
@@ -81,17 +81,17 @@ Future<void> init() async {
     );
 
     // Use Cases
-    sl.registerSingleton<SignInUseCase>(SignInUseCase(sl<AuthRepository>()));
-    sl.registerSingleton<SignUpUseCase>(SignUpUseCase(sl<AuthRepository>()));
-    sl.registerSingleton<SignOutUseCase>(SignOutUseCase(sl<AuthRepository>()));
-    sl.registerSingleton<GetCurrentUserUseCase>(GetCurrentUserUseCase(sl<AuthRepository>()));
-    sl.registerSingleton<GetMoviesUseCase>(GetMoviesUseCase(sl<MovieRepository>()));
-    sl.registerSingleton<GetMovieDetailsUseCase>(GetMovieDetailsUseCase(sl<MovieRepository>()));
-    sl.registerSingleton<GetMovieRecommendationsUseCase>(GetMovieRecommendationsUseCase(sl<MovieRepository>()));
-    sl.registerSingleton<SearchUseCase>(SearchUseCase(sl<SearchRepository>()));
+    sl.registerLazySingleton<SignInUseCase>(() => SignInUseCase(sl<AuthRepository>()));
+    sl.registerLazySingleton<SignUpUseCase>(() => SignUpUseCase(sl<AuthRepository>()));
+    sl.registerLazySingleton<SignOutUseCase>(() => SignOutUseCase(sl<AuthRepository>()));
+    sl.registerLazySingleton<GetCurrentUserUseCase>(() => GetCurrentUserUseCase(sl<AuthRepository>()));
+    sl.registerLazySingleton<GetMoviesUseCase>(() => GetMoviesUseCase(sl<MovieRepository>()));
+    sl.registerLazySingleton<GetMovieDetailsUseCase>(() => GetMovieDetailsUseCase(sl<MovieRepository>()));
+    sl.registerLazySingleton<GetMovieRecommendationsUseCase>(() => GetMovieRecommendationsUseCase(sl<MovieRepository>()));
+    sl.registerLazySingleton<SearchUseCase>(() => SearchUseCase(sl<SearchRepository>()));
 
     // Providers/Cubits
-    sl.registerSingleton<ThemeProvider>(ThemeProvider(sl<LocalStorage>()));
+    sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider(sl<LocalStorage>()));
 
     sl.registerFactory<AuthCubit>(
           () => AuthCubit(
