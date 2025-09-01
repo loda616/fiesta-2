@@ -1,92 +1,30 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-// Core imports
-import 'core/theme/theme_provider.dart';
+import 'core/injection_container.dart' as di;
+import 'core/injection_container.dart';
 import 'core/routes/app_router.dart';
 import 'core/storage/local_storage.dart';
-
-// Data layer imports
-import 'data/datasources/movie_api_source.dart';
+import 'core/theme/theme_provider.dart';
 import 'data/datasources/search_local_source.dart';
-import 'data/repositories/movie_repository_impl.dart';
-import 'data/repositories/auth_repository_impl.dart';
-
-// Domain layer imports
-import 'domain/usecases/sign_in_usecase.dart' show SignInUseCase;
-import 'domain/usecases/sign_out_usecase.dart' show SignOutUseCase;
-import 'domain/usecases/sign_up_usecase.dart' show SignUpUseCase;
-import 'domain/usecases/get_current_user_usecase.dart' show GetCurrentUserUseCase;
-import 'domain/usecases/get_movies_usecase.dart';
-
-// Presentation layer imports
 import 'presentation/cubit/auth_cubit.dart';
 import 'presentation/cubit/movie_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp();
+  await di.init();
 
-  // Initialize SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
-  final localStorage = LocalStorage(prefs);
-  final searchLocalSource = SearchLocalSource(prefs);
-
-  // Initialize API source
-  final movieApiSource = MovieApiSource();
-
-  // Initialize Repository
-  final movieRepository = MovieRepositoryImpl(movieApiSource);
-  final authRepository = AuthRepositoryImpl(
-    firebaseAuth: FirebaseAuth.instance,
-    firestore: FirebaseFirestore.instance,
-  );
-
-  // Initialize Use Cases
-  final getMoviesUseCase = GetMoviesUseCase(movieRepository);
-  final signInUseCase = SignInUseCase(authRepository);
-  final signUpUseCase = SignUpUseCase(authRepository);
-  final signOutUseCase = SignOutUseCase(authRepository);
-  final getCurrentUserUseCase = GetCurrentUserUseCase(authRepository);
-
-  runApp(MyApp(
-    localStorage: localStorage,
-    searchLocalSource: searchLocalSource,
-    getMoviesUseCase: getMoviesUseCase,
-    signInUseCase: signInUseCase,
-    signUpUseCase: signUpUseCase,
-    signOutUseCase: signOutUseCase,
-    getCurrentUserUseCase: getCurrentUserUseCase,
-  ));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final LocalStorage localStorage;
-  final SearchLocalSource searchLocalSource;
-  final GetMoviesUseCase getMoviesUseCase;
-  final SignInUseCase signInUseCase;
-  final SignUpUseCase signUpUseCase;
-  final SignOutUseCase signOutUseCase;
-  final GetCurrentUserUseCase getCurrentUserUseCase;
-
-  const MyApp({
-    super.key,
-    required this.localStorage,
-    required this.searchLocalSource,
-    required this.getMoviesUseCase,
-    required this.signInUseCase,
-    required this.signUpUseCase,
-    required this.signOutUseCase,
-    required this.getCurrentUserUseCase,
-  });
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -98,23 +36,16 @@ class MyApp extends StatelessWidget {
         return MultiProvider(
           providers: [
             ChangeNotifierProvider(
-              create: (_) => ThemeProvider(localStorage),
+              create: (_) => ThemeProvider(sl<LocalStorage>()),
             ),
             Provider<SearchLocalSource>.value(
-              value: searchLocalSource,
+              value: sl<SearchLocalSource>(),
             ),
             BlocProvider(
-              create: (_) => MovieCubit(
-                getMovies: getMoviesUseCase,
-              ),
+              create: (_) => sl<MovieCubit>(),
             ),
             BlocProvider(
-              create: (_) => AuthCubit(
-                signInUseCase: signInUseCase,
-                signUpUseCase: signUpUseCase,
-                signOutUseCase: signOutUseCase,
-                getCurrentUserUseCase: getCurrentUserUseCase,
-              ),
+              create: (_) => sl<AuthCubit>(),
             ),
           ],
           child: Consumer<ThemeProvider>(

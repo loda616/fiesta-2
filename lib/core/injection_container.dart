@@ -9,6 +9,7 @@ import '../data/repositories/auth_repository_impl.dart';
 import '../domain/repositories/movie_repository.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/usecases/get_current_user_usecase.dart' show GetCurrentUserUseCase;
+import '../domain/usecases/get_movie_details_usecase.dart';
 import '../domain/usecases/get_movies_usecase.dart';
 import '../domain/usecases/sign_in_usecase.dart' show SignInUseCase;
 import '../domain/usecases/sign_out_usecase.dart' show SignOutUseCase;
@@ -36,12 +37,20 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerFactory(
+    () => MovieBloc(
+      getMovies: sl(),
+      getMovieDetails: sl(),
+    ),
+  );
+
   // Use cases
   sl.registerLazySingleton(() => SignInUseCase(sl()));
   sl.registerLazySingleton(() => SignUpUseCase(sl()));
   sl.registerLazySingleton(() => SignOutUseCase(sl()));
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
   sl.registerLazySingleton(() => GetMoviesUseCase(sl()));
+  sl.registerLazySingleton(() => GetMovieDetailsUseCase(sl()));
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(

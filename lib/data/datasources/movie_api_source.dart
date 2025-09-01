@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../../core/errors/exceptions.dart';
 import '../models/movie_model.dart';
 
 class MovieApiSource {
-  final String apiKey = '95b349d9';
+  final String apiKey = dotenv.env['OMDB_API_KEY'] ?? '';
   final String baseUrl = 'http://www.omdbapi.com/';
   final http.Client client;
 
