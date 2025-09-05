@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import '../models/movie_model.dart';
+import '../../domain/entities/movie.dart';
 
 class WatchlistFirebaseSource {
   final FirebaseFirestore _firestore;
@@ -12,7 +12,7 @@ class WatchlistFirebaseSource {
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? firebase_auth.FirebaseAuth.instance;
 
-  Future<void> addToWatchlist(MovieModel movie) async {
+  Future<void> addToWatchlist(Movie movie) async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) throw Exception('User not authenticated');
 
@@ -52,7 +52,7 @@ class WatchlistFirebaseSource {
         .update({'watched': watched});
   }
 
-  Stream<List<MovieModel>> getWatchlist() {
+  Stream<List<Movie>> getWatchlist() {
     final userId = _auth.currentUser?.uid;
     if (userId == null) throw Exception('User not authenticated');
 
@@ -63,7 +63,7 @@ class WatchlistFirebaseSource {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) => MovieModel.fromJson({...doc.data(), 'imdbID': doc.id}))
+          .map((doc) => Movie.fromJson({...doc.data(), 'imdbID': doc.id}))
           .toList();
     });
   }
