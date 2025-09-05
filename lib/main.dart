@@ -45,6 +45,9 @@ class MyApp extends StatelessWidget {
               create: (_) => sl<MovieCubit>(),
             ),
             BlocProvider(
+              create: (_) => sl<MovieBloc>(),
+            ),
+            BlocProvider(
               create: (_) => sl<AuthCubit>(),
             ),
           ],
